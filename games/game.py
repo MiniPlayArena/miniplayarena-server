@@ -1,11 +1,17 @@
+from typing import Optional
+
 class Game:
 
-    def __init__(self, max_players: int, name: str, num_players: int, min_players: int = 2):
+    def __init__(self, max_players: int, name: str, player_ids: str, min_players: int = 2):
+        
         self.player_constraints = (min_players, max_players)
+        self.num_players = len(player_ids)
+        self.players = player_ids
+
         self.name = name
         self.current_player = 0
         self.winner = -1
-        self.num_players = num_players
+        
     
 
     def get_active_player(self) -> int:
@@ -85,4 +91,20 @@ class Game:
             The condition of the game
         """
         raise NotImplementedError("Please implement a win condition")
-        
+
+
+def create_game(game_id: str, players: [str]) -> Optional[Game]:
+    """Creates a game given the game id and the players present in the party
+
+    args:
+        game_id(str): the id of the game that should be played
+        players(list(str)): the list of player ids
+    """
+    r_val = None
+    if game_id == "uno":
+        import uno
+        r_val = uno.Uno(players)
+    elif game_id == "sal":
+        import sal
+        r_val =  sal.SnakesAndLadders(players)
+    return r_val
