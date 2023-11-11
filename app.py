@@ -1,3 +1,4 @@
+import logging
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
@@ -6,6 +7,9 @@ from clients import Clients
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "cum-monster"
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 limiter = Limiter(
     get_remote_address,

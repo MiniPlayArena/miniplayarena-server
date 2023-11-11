@@ -1,4 +1,4 @@
-from flask_socketio import emit, join_room, leave_room, send
+from flask_socketio import emit, join_room, leave_room
 from __main__ import socketio, clients
 
 
@@ -37,7 +37,7 @@ def create_party(data):
     """Create a player and store them in the client object"""
     try:
         success, party_id, party = clients.create_party(data["partyLeader"])
-        party_leader = party[0]
+        party_leader = None if party is None else list(party.keys())[0]
 
         if success:
             join_room(party_id)
@@ -46,7 +46,7 @@ def create_party(data):
                 {
                     "partyId": party_id,
                     "partyLeader": party_leader,
-                    "players": party,
+                    "players": party
                 },
             )
         else:
@@ -60,7 +60,7 @@ def join_party(data):
     """Attempt to join a party"""
     try:
         success, party = clients.join_party(data["partyId"], data["clientId"])
-        party_leader = party[0]
+        party_leader = None if party is None else list(party.keys())[0]
 
         if success: 
             join_room(data["partyId"])
@@ -90,10 +90,9 @@ def leave_party(data):
     """Attempt to leave a party"""
     try:
         success, party = clients.leave_party(data["partyId"], data["clientId"])
-        party_leader = party[0]
+        party_leader = None if party is None else list(party.keys())[0]
 
         if success:
-            leave_room(data["partyId"])
             emit(
                 "left-party",
                 {
@@ -104,6 +103,7 @@ def leave_party(data):
                 },
                 to = data["partyId"]
             )
+            leave_room(data["partyId"])
         else:
             emit(
                 "error",
