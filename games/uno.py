@@ -130,8 +130,14 @@ class Uno(Game):
         self.discard_pile.append(card)
 
         self.do_card(card, next_player)
+        if self.has_won(self.current_player):
+            print(f"Player {self.current_player} won!!! :D")
+            self.winner = self.current_player
+            return
         self.update_player_index()
 
+    def has_won(self, player: int) -> bool:
+        return len(self.user_hands[player]) == 0
 
     def do_card(self, card: int, next_player: int):
         """ Applies the result of a special card
