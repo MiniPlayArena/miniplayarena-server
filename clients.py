@@ -134,6 +134,7 @@ class Clients:
             if self.is_party(party_id) and self.is_in_party(client_id, party_id):
                 print("Checking if correct game is being played")
                 if self.is_game_playing(party_id):
+                    print("Game found, sending game status!")
                     game: Game = self.games[party_id]
                     game_status = game.get_client_data(client_id)
                     return True, game_status
