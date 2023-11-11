@@ -136,8 +136,8 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     
     return None if (not r_val or not r_val.is_valid_playercount()) else r_val
 
-# if __name__ == "__main__":
-#     u = create_game("uno", ["jopat2409", "nexinfinite", "cactusjack", "1blademaster"])
-#     while 1:
-#         for player in  ["jopat2409", "nexinfinite", "cactusjack", "1blademaster"]:
-#             u.take_turn(player, {"played-card": 0})
+if __name__ == "__main__":
+    u = create_game("uno", ["jopat2409", "nexinfinite", "cactusjack", "1blademaster"])
+    while 1:
+        for player in  ["jopat2409", "nexinfinite", "cactusjack", "1blademaster"]:
+            u.take_turn(player, {"played-card": 0})
