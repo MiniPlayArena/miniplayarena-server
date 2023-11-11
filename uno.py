@@ -49,17 +49,31 @@ class Uno:
         
         self.winner = -1            # updated when someone wins the game
         self.current_player = 0     # index of the current player
+        self.next_player = 1        # needed as can be skipped by certain cards
+        self.reversed = False
 
         self.play_game()
     
 
-    def play_game(self):
+    def play_game(self) -> None:
+        """Plays a single game of uno with the hands dealt and the players selected
+
+        args:
+            None
+
+        returns:
+            None
+        """
         while self.winner == -1:
-            next_player = (current_player + 1) % self.num_players
-            self.take_turn(self.current_player, next_player)
-            current_player = next_player
+            self.take_turn(self.current_player, self.next_player)
+            self.update_player_index()
     
-    def take_turn(self, current_player: int, next_player: int):
+    def update_player_index(self) -> None:
+        self.current_player = self.next_player
+        n_player = self.current_player - 1 if self.reversed else self.current_player + 1
+        self.next_player = n_player % self.num_players
+    
+    def take_turn(self, current_player: int, next_player: int) -> None:
         """Takes a turn given the current player and the player that will bare the 
         results of the player's actions
 
@@ -70,9 +84,17 @@ class Uno:
         # if the user cannot play a card then they 
         if not self.can_play(current_player):
             self.give_cards(current_player, 1)
+        
+        # get the card that the user wishes to play
         card = self.user_hands[current_player].pop(self.get_user_choice())
+        
+        # if they cannot play it then try this function again
         if not self.can_play_card(card):
-            self.take_turn(current_player, next_player)
+            return self.take_turn(current_player, next_player)
+        
+        # since they can play the card, do the actions
+        self.discard_pile.append(card)
+        
 
     def can_play(self, player: int):
         return any(map(self.can_play_card, self.user_hands[player]))
