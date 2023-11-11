@@ -1,7 +1,7 @@
 from game import Game
 import random
 
-class SnakesAndLadders():
+class SnakesAndLadders(Game):
     
 
     def __init__(self, players: [str]):
@@ -24,10 +24,7 @@ class SnakesAndLadders():
             4: 14,
             21: 42
         }
-
-        if not self.is_valid_playercount(num_players):
-            return False
-        self.player_positions = [1 for i in range(num_players)]
+        self.player_positions = {player: 1 for player in self.players}
     
     def get_client_data(self, player: int) -> dict:
         """Returns the game state for a specific client
