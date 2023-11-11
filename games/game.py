@@ -51,6 +51,9 @@ class Game:
         """
         raise NotImplementedError("Implement this please :DDD")
 
+    def get_player_id(self, player_index: int) -> str:
+        return self.players[player_index]
+
     def get_all_client_data(self) -> dict:
         """Gets all the data for ALL the clients and returns in JSON format
 
@@ -124,8 +127,11 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     if game_id == "uno":
         import uno
         r_val = uno.Uno(players)
-    elif game_id == "sal":
+    elif game_id == "snakes":
         import sal
         r_val =  sal.SnakesAndLadders(players)
     
     return None if (not r_val or not r_val.is_valid_playercount()) else r_val
+
+if __name__ == "__main__":
+    u = create_game("uno", ["jopat2409", "nexinfinite", "cactusjack", "1blademaster"])
