@@ -1,5 +1,5 @@
 from enum import IntFlag
-from game import Game
+from games.game import Game
 import random
 
 
