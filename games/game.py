@@ -92,6 +92,14 @@ class Game:
         """
         raise NotImplementedError("Please implement a win condition")
 
+    def remove_player(self, player: str) -> None:
+        """Removes a player from the game in the case of a disconnect
+
+        args:
+            player(str): the id of the player to be removed
+        """
+        raise NotImplementedError("Please implement player removal logic")
+
 
 def create_game(game_id: str, players: [str]) -> Optional[Game]:
     """Creates a game given the game id and the players present in the party
