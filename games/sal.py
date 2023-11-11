@@ -1,16 +1,6 @@
 from game import Game
 import random
 
-class BoardPos:
-
-    def __init__(self, num):
-        x = num%10
-        self.xy = (x, num - x*10)
-        print(self.xy)
-
-    def get_pos(self) -> tuple:
-        return self.xy
-
 class SnakesAndLadders(Game):
     
 
@@ -79,4 +69,4 @@ class SnakesAndLadders(Game):
         return 
 
 if __name__ == "__main__":
-    s = SnakesAndLadders(3)
+    s = SnakesAndLadders(2)
