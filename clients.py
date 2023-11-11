@@ -9,7 +9,7 @@ class Clients:
         self.games = {}
         self.parties = {}
 
-        self.valid_games = ["uno", "sal"]
+        self.valid_games = ["uno", "snakes"]
 
     # USEFUL FUNCTIONS
     def is_user(self, client_id: str):
