@@ -114,7 +114,7 @@ class Uno(Game):
         
         # since they can play the card, do the actions
         self.discard_pile.append(card)
-        self.do_card(card, self.next_player)
+        self.do_card(card, self.next_player, turn_data)
 
         # update current player and next player pointers
         self.update_player_pointers(self.reversed)
