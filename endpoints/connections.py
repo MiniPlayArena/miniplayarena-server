@@ -1,16 +1,22 @@
+import uuid
 from flask_socketio import emit, join_room, leave_room
 from __main__ import socketio, clients
 
-
 @socketio.on("connect")
 def connection():
-    emit("Hello!", {"data": "y u reading dis"})
-    print("User connected!")
+    print("Client connected!")
 
 
 @socketio.on("disconnect")
 def disconnect():
-    print("User disconnected!")
+    print("Client disconnected!")
+
+
+@socketio.on("get-uuid")
+def get_uuid():
+    client_uuid = uuid.uuid4()
+    emit("set-uuid", {"uuid": str(client_uuid)})
+    print(f"Generated new UUID: {client_uuid}")
 
 
 @socketio.on("create-player")
@@ -180,7 +186,7 @@ def get_game_state(data):
 def update_game_state(data):
     """Updates the game state if possible"""
     try:
-        success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], data["gameId"], data["gameState"])
+        success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], data["gameState"])
 
         if success:
             emit(
@@ -205,6 +211,31 @@ def update_game_state(data):
                 "error",
                 {
                     "message": error_message
+                }
+            )
+    except Exception as e:
+        emit("error", {"message": e})
+
+
+@socketio.on("delete-game")
+def delete_game(data):
+    """Delete the game"""
+    try:
+        success = clients.delete_game(data["partyId"])
+
+        if success:
+            emit(
+                "game-over",
+                {
+                    "partyId": data["partyId"]
+                },
+                to = data["partyId"]
+            )
+        else:
+            emit(
+                "error",
+                {
+                    "message": "game could not be stopped, this could be due to the game not existing"
                 }
             )
     except Exception as e:

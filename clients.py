@@ -53,7 +53,7 @@ class Clients:
     # OTHER STUFF
     def create_player(self, client_id: str, username: str) -> bool:
         """Add player to clients list"""
-        if not self.is_user(client_id) and 12 > len(username) > 3:
+        if 12 > len(username) > 3:
             self.clients[client_id] = username
             print(f"Added player! {client_id} => {username}")
             return True
@@ -134,9 +134,10 @@ class Clients:
         """Returns the current game state for that player"""
         if self.is_user(client_id):
             print("Checking if the player is in the correct party...")
-            print(self.is_party(party_id), self.is_in_party(client_id, party_id))
             if self.is_party(party_id) and self.is_in_party(client_id, party_id):
                 print("Checking if correct game is being played")
+
+                # Return correct game if found
                 if self.is_game_playing(party_id):
                     print("Game found, sending game status!")
                     game: Game = self.games[party_id]
@@ -144,9 +145,38 @@ class Clients:
                     return True, game_status
         return False, None
 
-    def update_game_state(self, party_id: str, client_id: str, game_id: str, game_state):
+    def update_game_state(self, party_id: str, client_id: str, game_state):
         """Attempts to update game state"""
-        pass
+        if self.is_user(client_id):
+            print("Checking if user is in correct party...")
+            if self.is_party(party_id) and self.is_in_party(client_id, party_id):
+                print("Checking if correct game is being played")
+
+                # Update game status
+                if self.is_game_playing(party_id):
+                    print("Game found, sending game status!")
+                    game: Game = self.games[party_id]
+                    game_status = game.take_turn(client_id, game_state)
+
+                    # Check if game is won
+                    has_won, won_status = game.game_is_won()
+                    if has_won:
+                        print("Game is over!")
+                        return True, won_status
+                    return True, game_status
+        return False, None
+    
+    def delete_game(self, party_id: str, client_id: str):
+        if self.is_user(client_id):
+            print("Checking if user is in correct party...")
+            if self.is_party(party_id) and self.is_in_party(client_id, party_id):
+                print("Checking if game exists...")
+
+                if self.is_game_playing(party_id):
+                    self.games.pop(party_id)
+                    print("Game has been deleted!")
+                    return True
+        return False
 
 
 # Other useful functions
