@@ -55,10 +55,11 @@ BASE_UNO_DECK: (int) = tuple(
 class Uno(Game):
 
     def __init__(self, num_players: int):
-        super().__init__(10, "Uno")
+
+        super().__init__(10, "Uno", num_players)
         if not self.is_valid_playercount(num_players):
             return
-        self.num_players = num_players
+        
         # Game setup
         self.draw_pile = self.randomise_cards()
         self.user_hands = list([] for i in range(num_players))
@@ -68,27 +69,12 @@ class Uno(Game):
 
         # apply the result of the first card
         self.do_card(self.get_top_card(), 0)
-        
-        self.winner = -1            # updated when someone wins the game
-        self.current_player = 0     # index of the current player
+
+        # inits
         self.next_player = 1        # needed as can be skipped by certain cards
         self.reversed = False
         self.c_col_card = None
 
-        print("Initialised uno game! :D")
-
-
-    def play_game(self) -> None:
-        """Plays a single game of uno with the hands dealt and the players selected
-
-        args:
-            None
-
-        returns:
-            None
-        """
-        while self.winner == -1:
-            self.take_turn(self.current_player, self.next_player)
     
     def update_player_index(self) -> None:
         """ Updates the current and next player based on the current rules in play
@@ -103,41 +89,60 @@ class Uno(Game):
         n_player = self.next_player - 1 if self.reversed else self.next_player + 1
         self.next_player = n_player % self.num_players
     
-    def take_turn(self, current_player: int, next_player: int) -> None:
+    def take_turn(self, current_player: int, turn_data: dict) -> bool:
         """Takes a turn given the current player and the player that will bare the 
         results of the player's actions
 
         args:
             current_player(int): player that is currently playing their turn
-            next_player(int): player that is to the left of the current player
+            turn_data(int): the data for the turn that the player has submitted.
+                For Uno, this should be in the format {
+                    played_card: <played-card>
+                }
+                where <played-card> is the index of the card that the player has attempted to play
         """
+
+        r_data = self.get_all_client_data()
+
+        # if the current player is not the one that is allowed to play
+        if current_player != self.current_player:
+            r_data["game-state"][current_player].update({"display-message": "It is not your turn you gimp"})
+            return r_data
+            
         # if the user cannot play a card then they 
         if not self.can_play(current_player):
-            print(f"Player {current_player} cannot play")
             self.give_cards(current_player, 1)
-            return
+            self.update_player_index()
+            r_data["game-state"][current_player].update({"display-message": "You cannot play. Unlucky :D"})
         
         # get the card that the user wishes to play
-        card = self.user_hands[current_player].pop(self.get_user_choice(current_player))
+        played_card = int(turn_data["played-card"])
+        if played_card < 0 or played_card >= len(self.user_hands[current_player]):
+            r_data["game-state"][current_player].update({"display-message": "Error.."})
+            return r_data
+        
+        card = self.user_hands[current_player].pop()
         # if they cannot play it then try this function again
-        while not self.can_play_card(card):
-            print(f"Cannot play {card} on {self.get_top_card()}")
+        if not self.can_play_card(card):
             # re-add card to hand and return
             self.user_hands[current_player].append(card)
-            card = self.user_hands[current_player].pop(self.get_user_choice(current_player))
+            r_data["game-state"][current_player].update({"display-message": "Cannot play that card idiot"})
         
         # since they can play the card, do the actions
         self.discard_pile.append(card)
+        self.do_card(card, self.next_player)
 
-        self.do_card(card, next_player)
-        if self.has_won(self.current_player):
-            print(f"Player {self.current_player} won!!! :D")
-            self.winner = self.current_player
-            return
+        # update current player and next player pointers
         self.update_player_index()
+
+        # re-generate data as the state has changed
+        return self.get_all_client_data()
 
     def has_won(self, player: int) -> bool:
         return len(self.user_hands[player]) == 0
+
+    def game_is_won(self) -> bool:
+        return any(map(self.has_won, range(self.num_players)))
 
     def do_card(self, card: int, next_player: int):
         """ Applies the result of a special card
