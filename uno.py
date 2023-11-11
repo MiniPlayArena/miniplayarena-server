@@ -29,9 +29,12 @@ class Card(IntFlag):
     def __repr__(self) -> str:
         vals = self.name.replace('CL_', '').split("|")
         if len(vals) > 1:
-            return f"{vals[0].capitalize()} {vals[1].replace('V_', '').capitalize().replace('_', ' ')}"
+            return f"{vals[0].capitalize()} {vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
-            return f"Wildcard: {vals[0].replace('V_', '')}"
+            return f"Wildcard: {vals[0].replace('V_', '').replace('_', ' ').capitalize()}"
+    
+    def __str__(self) -> str:
+        return self.__repr__()
 
 
 
@@ -64,6 +67,7 @@ class Uno:
         self.current_player = 0     # index of the current player
         self.next_player = 1        # needed as can be skipped by certain cards
         self.reversed = False
+        self.c_col_card = None
 
         self.play_game()
 
@@ -79,7 +83,6 @@ class Uno:
         """
         while self.winner == -1:
             self.take_turn(self.current_player, self.next_player)
-            self.update_player_index()
     
     def update_player_index(self) -> None:
         """ Updates the current and next player based on the current rules in play
@@ -91,7 +94,7 @@ class Uno:
             None
         """
         self.current_player = self.next_player
-        n_player = self.current_player - 1 if self.reversed else self.current_player + 1
+        n_player = self.next_player - 1 if self.reversed else self.next_player + 1
         self.next_player = n_player % self.num_players
     
     def take_turn(self, current_player: int, next_player: int) -> None:
@@ -104,18 +107,22 @@ class Uno:
         """
         # if the user cannot play a card then they 
         if not self.can_play(current_player):
+            print(f"Player {current_player} cannot play")
             self.give_cards(current_player, 1)
+            return
         
         # get the card that the user wishes to play
         card = self.user_hands[current_player].pop(self.get_user_choice(current_player))
         # if they cannot play it then try this function again
         if not self.can_play_card(card):
             print(f"Cannot play {card} on {self.get_top_card()}")
+            return
         
         # since they can play the card, do the actions
         self.discard_pile.append(card)
 
         self.do_card(card, next_player)
+        self.update_player_index()
 
 
     def do_card(self, card: int, next_player: int):
@@ -123,12 +130,17 @@ class Uno:
         """
         if card & Card.V_PLUS_FOUR:
             self.give_cards(next_player, 4)
+            self.change_colour()
         elif card & Card.V_PLUS_TWO:
             self.give_cards(next_player, 2)
         elif card & Card.V_STOP:
             self.next_player = (next_player + 1)%self.num_players
         elif card & Card.V_REVERSE:
             self.reversed = not self.reversed
+            n_player = self.next_player - 1 if self.reversed else self.next_player + 1
+            self.next_player = n_player % self.num_players
+        elif card & Card.V_CHANGE_COLOUR:
+            self.change_colour()
 
 
     def can_play(self, player: int) -> bool:
@@ -136,6 +148,7 @@ class Uno:
 
 
     def get_user_choice(self, player: int) -> int:
+        print(f"\nThe top card is {self.get_top_card()}, player {player} what do you play?")
         hand = self.user_hands[player]
         print(f"Your cards are: {hand}")
         return int(input("What do you want to play? >> "))
@@ -144,7 +157,8 @@ class Uno:
     def get_top_card(self) -> Card:
         """ Gets the card that is currently facing the board
         """
-        return self.discard_pile[-1]
+        c = Card(self.discard_pile[-1])
+        return c
 
 
     def randomise_cards(self) -> [int]:
@@ -169,6 +183,11 @@ class Uno:
             bool: can the card be played?
         """
         top_card = self.get_top_card()
+        # if the colour was just changed, only check for colour
+        if top_card & Card.V_PLUS_FOUR or top_card & Card.V_CHANGE_COLOUR:
+            return Uno.are_same_colour(played_card, self.c_col_card)
+
+        # else check for same colour, value or wildcard being played
         return Uno.are_same_colour(played_card, top_card) or \
                 Uno.are_same_value(played_card, top_card) or\
                 Uno.is_wildcard(played_card)
@@ -203,14 +222,34 @@ class Uno:
 
     @staticmethod
     def are_same_value(card1: int, card2: int) -> bool:
-        mask = (1<<18 - 1) &~15
+        """Checks if two cards have the same value (excluding +4 and colour change)
+
+        args:
+            card1: The first card to perform the comparison with
+            card2: The second card to perform the comparison with
+        
+        returns:
+            true if the cards have the same value, otherwise false
+        """
+        mask = ((1<<18) - 1) &~15
         return card1 & mask == card2 & mask
 
     @staticmethod
     def is_wildcard(card: int) -> bool:
         return not card & 15
+
+
+    def change_colour(self) -> None:
+        """ Changes the colour without changing the top card, as needed when +4 and colour change
+        cards are used
+
+        args:
+            None
+
+        returns:
+            The card with just the colour
+        """
+        c_col_card =  Card(int(input("What colour? 1, 2, 4 or 8")))
     
 if __name__ == "__main__":
-    print(Uno.are_same_colour(Card.CL_BLUE, Card.CL_BLUE))
-    print(Uno.are_same_colour(Card.CL_BLUE, Card.CL_GREEN))
     u = Uno(3)
