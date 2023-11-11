@@ -1,4 +1,5 @@
 from enum import IntFlag
+from game import Game
 import random
 
 
@@ -51,10 +52,12 @@ BASE_UNO_DECK: (int) = tuple(
 )
 
 
-class Uno:
+class Uno(Game):
 
     def __init__(self, num_players: int):
-
+        super().__init__(10, "Uno")
+        if not self.is_valid_playercount(num_players):
+            return
         self.num_players = num_players
         # Game setup
         self.draw_pile = self.randomise_cards()
@@ -69,7 +72,7 @@ class Uno:
         self.reversed = False
         self.c_col_card = None
 
-        self.play_game()
+        print("Initialised uno game! :D")
 
 
     def play_game(self) -> None:
@@ -269,5 +272,15 @@ class Uno:
         """
         c_col_card =  Card(int(input("What colour? 1, 2, 4 or 8")))
     
+
+    def get_player_data(self, player: int) -> dict:
+        return {
+            "c_facing_card": self.get_top_card(),
+            "c_hand": [
+                str(card) for card in self.user_hands[player]
+            ]
+        }
+    
 if __name__ == "__main__":
     u = Uno(2)
+    print(u.get_player_data(0))
