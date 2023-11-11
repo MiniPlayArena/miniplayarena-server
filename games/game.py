@@ -10,9 +10,18 @@ class Game:
 
         self.name = name
         self.current_player = 0
+        self.next_player = 1
         self.winner = -1
         
-    
+    def update_player_pointers(self, reverse: bool=False) -> None:
+        """ Updates the player pointers once a turn has been taken
+
+        args:
+            reverse(bool): Whether or not the direction of players should be cw (false) or acw (true)
+        """
+        self.current_player = self.next_player
+        self.next_player += -1 if reverse else 1
+        self.next_player %= self.num_players
 
     def get_active_player(self) -> int:
         """Gets the player who's turn it is next.
