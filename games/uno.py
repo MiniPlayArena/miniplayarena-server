@@ -30,7 +30,7 @@ class Card(IntFlag):
     def __repr__(self) -> str:
         vals = self.name.replace('CL_', '').split("|")
         if len(vals) > 1:
-            return f"{vals[0].capitalize()[0]} {vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
+            return f"{vals[0].capitalize()[0]}{vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
             return f"Wildcard: {vals[0].replace('V_', '').replace('_', ' ').capitalize()}"
     
