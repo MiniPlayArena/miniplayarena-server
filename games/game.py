@@ -69,7 +69,7 @@ class Game:
         """
         raise NotImplementedError("Implement this one too :(")
 
-    def is_valid_playercount(self, players: int) -> bool:
+    def is_valid_playercount(self) -> bool:
         """ Checks if the given number of players is allowed
 
         args:
@@ -78,7 +78,7 @@ class Game:
         returns:
             is the player count valid
         """
-        return self.player_constraints[0] <= players <= self.player_constraints[1]
+        return self.player_constraints[0] <= self.num_players <= self.player_constraints[1]
 
 
     def game_is_won(self) -> bool:
@@ -99,6 +99,9 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     args:
         game_id(str): the id of the game that should be played
         players(list(str)): the list of player ids
+    
+    returns:
+        a game if the player count was valid, else returns None
     """
     r_val = None
     if game_id == "uno":
@@ -107,4 +110,5 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     elif game_id == "sal":
         import sal
         r_val =  sal.SnakesAndLadders(players)
-    return r_val
+    
+    return None if (not r_val or not r_val.is_valid_playercount()) else r_val
