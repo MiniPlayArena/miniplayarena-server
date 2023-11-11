@@ -122,6 +122,9 @@ class Uno(Game):
         self.discard_pile.append(card)
         self.do_card(card, self.next_player, turn_data)
 
+        if len(self.user_hands[current_player]) == 0 and self.winner == "":
+            self.winner = current_player
+
         # update current player and next player pointers
         self.update_player_pointers(self.reversed)
 
@@ -132,7 +135,11 @@ class Uno(Game):
         return len(self.user_hands[player]) == 0
 
     def game_is_won(self) -> bool:
-        return any(map(self.has_won, range(self.num_players)))
+        count = 0
+        for player in self.user_hands:
+            if len(self.user_hands[player] != 0):
+                count +=1
+        return count < 2, self.winner
 
     def do_card(self, card: int, next_player: int, play_data: dict):
         """ Applies the result of a special card
