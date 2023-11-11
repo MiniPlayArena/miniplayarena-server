@@ -128,7 +128,7 @@ class Uno(Game):
     def game_is_won(self) -> bool:
         return any(map(self.has_won, range(self.num_players)))
 
-    def do_card(self, card: int, next_player: int):
+    def do_card(self, card: int, next_player: int, play_data: dict):
         """ Applies the result of a special card
         """
         if card & Card.V_PLUS_FOUR:
@@ -144,7 +144,7 @@ class Uno(Game):
             n_player = self.next_player - 1 if self.reversed else self.next_player + 1
             self.next_player = n_player % self.num_players
         elif card & Card.V_CHANGE_COLOUR:
-            self.change_colour()
+            self.change_colour(play_data["action-change-colour"])
 
 
     def can_play(self, player: int) -> bool:
@@ -269,7 +269,7 @@ class Uno(Game):
         return not card & 15
 
 
-    def change_colour(self) -> None:
+    def change_colour(self, colour: int) -> None:
         """ Changes the colour without changing the top card, as needed when +4 and colour change
         cards are used
 
@@ -279,7 +279,7 @@ class Uno(Game):
         returns:
             The card with just the colour
         """
-        self.c_col_card =  Card(int(input("What colour? 1, 2, 4 or 8")))
+        self.c_col_card =  Card(colour)
     
 
     def get_client_data(self, player: str) -> dict:
