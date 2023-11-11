@@ -2,7 +2,7 @@ from typing import Optional
 
 class Game:
 
-    def __init__(self, max_players: int, name: str, player_ids: str, min_players: int = 2):
+    def __init__(self, max_players: int, name: str, player_ids: str, min_players: int = 1):
         
         self.player_constraints = (min_players, max_players)
         self.num_players = len(player_ids)

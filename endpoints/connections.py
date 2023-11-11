@@ -114,7 +114,7 @@ def leave_party(data):
     except Exception as e:
         emit("error", {"message": e})
 
-# TODO
+
 @socketio.on("create-game")
 def create_game(data):
     """Attempt to create game"""
@@ -149,7 +149,7 @@ def create_game(data):
     except Exception as e:
         emit("error", {"message": e})
 
-# TODO
+
 @socketio.on("get-game-state")
 def get_game_state(data):
     """Allows the user to get the games state"""
@@ -175,7 +175,7 @@ def get_game_state(data):
     except Exception as e:
         emit("error", {"message", e})
 
-# TODO
+
 @socketio.on("updated-game-state")
 def update_game_state(data):
     """Updates the game state if possible"""
