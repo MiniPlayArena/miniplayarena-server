@@ -30,7 +30,7 @@ class Card(IntFlag):
     def __repr__(self) -> str:
         vals = self.name.replace('CL_', '').split("|")
         if len(vals) > 1:
-            return f"{vals[0].capitalize()} {vals[1].replace('V_', '').replace('_', ' ').capitalize()[0]}"
+            return f"{vals[0].capitalize()[0]} {vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
             return f"Wildcard: {vals[0].replace('V_', '').replace('_', ' ').capitalize()}"
     
@@ -90,14 +90,14 @@ class Uno(Game):
 
         # if the current player is not the one that is allowed to play
         if current_player != self.current_player:
-            r_data["game-state"][self.get_player_index(current_player)].update({"display-message": "It is not your turn you gimp"})
+            r_data["game-state"][current_player].update({"display-message": "It is not your turn you gimp"})
             return r_data
             
         # if the user cannot play a card then they 
         if not self.can_play(current_player):
             self.give_cards(current_player, 1)
             self.update_player_index()
-            r_data["game-state"][self.get_player_index(current_player)].update({"display-message": "You cannot play. Unlucky :D"})
+            r_data["game-state"][current_player].update({"display-message": "You cannot play. Unlucky :D"})
         
         # get the card that the user wishes to play
         played_card = int(turn_data["played-card"])
@@ -291,7 +291,7 @@ class Uno(Game):
             "next_player": self.get_player_id(self.next_player),
             "c_facing_card": self.get_top_card(),
             "c_hand": [
-                str(card) for card in self.user_hands[self.get_player_id(player)]
+                str(card) for card in self.user_hands[player]
             ]
         }
     
