@@ -65,13 +65,13 @@ class Uno(Game):
         self.deal_hands(self.num_players)
         self.discard_pile = [self.draw_next_card()]                # stack
 
-        # apply the result of the first card
-        self.do_card(self.get_top_card(), 0)
-
         # inits
         self.next_player = 1        # needed as can be skipped by certain cards
         self.reversed = False
         self.c_col_card = None
+
+         # apply the result of the first card
+        self.do_card(self.get_top_card(), 0)
     
     def take_turn(self, current_player: str, turn_data: dict) -> bool:
         """Takes a turn given the current player and the player that will bare the 
