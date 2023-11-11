@@ -2,7 +2,7 @@
 
 class Game:
 
-    def __init__(self, max_players: int, name: str, min_players: int):
+    def __init__(self, max_players: int, name: str, min_players: int = 2):
         self.player_constraints = (min_players, max_players)
         self.name = name
 
