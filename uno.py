@@ -4,26 +4,26 @@ import random
 
 
 class Card(IntFlag):
-    CL_RED = 0
-    CL_GREEN = 1<<0
-    CL_YELLOW = 1<<1
-    CL_BLUE = 1<<2
+    CL_RED = 1<<0
+    CL_GREEN = 1<<1
+    CL_YELLOW = 1<<2
+    CL_BLUE = 1<<3
 
-    V_0 = 1<<3
-    V_1 = 1<<4
-    V_2 = 1<<5
-    V_3 = 1<<6
-    V_4 = 1<<7
-    V_5 = 1<<8
-    V_6 = 1<<9
-    V_7 = 1<<10
-    V_8 = 1<<11
-    V_9 = 1<<12
-    V_STOP = 1<<13
-    V_REVERSE = 1<<14
-    V_PLUSTWO = 1<<15
-    V_PLUSFOUR = 1<<16
-    V_CHANGECOLOUR = 1<<17
+    V_0 = 1<<5
+    V_1 = 1<<6
+    V_2 = 1<<7
+    V_3 = 1<<8
+    V_4 = 1<<9
+    V_5 = 1<<10
+    V_6 = 1<<11
+    V_7 = 1<<12
+    V_8 = 1<<13
+    V_9 = 1<<14
+    V_STOP = 1<<15
+    V_REVERSE = 1<<16
+    V_PLUSTWO = 1<<17
+    V_PLUSFOUR = 1<<18
+    V_CHANGECOLOUR = 1<<19
 
 
 # Uno Constants
@@ -45,7 +45,7 @@ class Uno:
         self.user_hands = list([] for i in range(num_players))
 
         self.deal_hands(self.num_players)
-        self.discard_pile = self.draw_next_card()                # stack
+        self.discard_pile = [self.draw_next_card()]                # stack
         
         self.winner = -1            # updated when someone wins the game
         self.current_player = 0     # index of the current player
@@ -86,28 +86,43 @@ class Uno:
             self.give_cards(current_player, 1)
         
         # get the card that the user wishes to play
-        card = self.user_hands[current_player].pop(self.get_user_choice())
-        
+        card = self.user_hands[current_player].pop(self.get_user_choice(current_player))
+        print(card)
         # if they cannot play it then try this function again
         if not self.can_play_card(card):
-            return self.take_turn(current_player, next_player)
+            print(f"Cannot play {card} on {self.get_top_card()}")
         
         # since they can play the card, do the actions
         self.discard_pile.append(card)
-        
+
+        self.do_card(card)
+
+
+    def do_card(self, card: int, next_player: int):
+        """ Applies the result of a special card
+        """
+        if card & Card.V_PLUSFOUR:
+            self.give_cards(next_player, 4)
+        elif card & Card.V_PLUSTWO:
+            self.give_cards(next_player, 2)
+        elif card & Card.V_STOP:
+            self.next_player = (next_player + 1)%self.num_players
+        elif card & Card.V_REVERSE:
+            self.reversed = not self.reversed
+
 
     def can_play(self, player: int):
         return any(map(self.can_play_card, self.user_hands[player]))
 
 
     def get_user_choice(self, player: int) -> int:
-        return random.randint(0, len(self.user_hands[player]))
+        return random.randint(0, len(self.user_hands[player])-1)
     
 
-    def get_top_card(self) -> Card:
+    def get_top_card(self) -> int:
         """ Gets the card that is currently facing the board
         """
-        return self.card_stack[-1]
+        return self.discard_pile[-1]
 
 
     def randomise_cards(self) -> [int]:
@@ -131,7 +146,10 @@ class Uno:
         returns:
             bool: can the card be played?
         """
-        return False
+        top_card = self.get_top_card()
+        return Uno.are_same_card(played_card, top_card) or \
+                Uno.are_same_value(played_card, top_card) or\
+                Uno.is_wildcard(played_card)
     
     def draw_next_card(self) -> int:
         """Draw the next card from the draw pile
@@ -149,7 +167,10 @@ class Uno:
     
     @staticmethod
     def are_same_colour(card1: int, card2: int) -> bool:
-        return card1 & COLOUR_MASK == card2 & COLOUR_MASK
+        mask = 15
+        return card1 & mask == card2 & mask
     
 if __name__ == "__main__":
+    print(Uno.are_same_colour(Card.CL_BLUE, Card.CL_BLUE))
+    print(Uno.are_same_colour(Card.CL_BLUE, Card.CL_GREEN))
     u = Uno(3)
