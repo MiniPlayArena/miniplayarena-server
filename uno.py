@@ -198,6 +198,15 @@ class Uno:
         return self.draw_pile.pop(-1)
     
     def give_cards(self, player: int, num_cards: int) -> None:
+        """Adds a number of cards to the player's hand
+
+        args:
+            player(int): the player to add the cards to
+            num_cards(int): the number of cards to give the player
+        
+        returns:
+            None
+        """
         self.user_hands[player] += [self.draw_next_card() for i in range(num_cards)]
     
     def deal_hands(self, num_players: int) -> [Card]:
@@ -236,6 +245,15 @@ class Uno:
 
     @staticmethod
     def is_wildcard(card: int) -> bool:
+        """Checks if a card is a wildcard
+        In reality, just checks if a card has a colour bit assigned to it, if not then it must be a wildcard
+
+        args:
+            card(int): the card to check
+        
+        returns:
+            bool: whether the card is a wildcard (+4 or colour change)
+        """
         return not card & 15
 
 
@@ -252,4 +270,4 @@ class Uno:
         c_col_card =  Card(int(input("What colour? 1, 2, 4 or 8")))
     
 if __name__ == "__main__":
-    u = Uno(3)
+    u = Uno(2)
