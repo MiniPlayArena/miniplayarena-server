@@ -65,6 +65,9 @@ class Uno(Game):
 
         self.deal_hands(self.num_players)
         self.discard_pile = [self.draw_next_card()]                # stack
+
+        # apply the result of the first card
+        self.do_card(self.get_top_card(), 0)
         
         self.winner = -1            # updated when someone wins the game
         self.current_player = 0     # index of the current player
@@ -121,7 +124,7 @@ class Uno(Game):
             print(f"Cannot play {card} on {self.get_top_card()}")
             # re-add card to hand and return
             self.user_hands[current_player].append(card)
-            return
+            card = self.user_hands[current_player].pop(self.get_user_choice(current_player))
         
         # since they can play the card, do the actions
         self.discard_pile.append(card)
@@ -137,6 +140,7 @@ class Uno(Game):
             self.give_cards(next_player, 4)
             self.change_colour()
         elif card & Card.V_PLUS_TWO:
+            #TODO: Implement logic for stacking +2s
             self.give_cards(next_player, 2)
         elif card & Card.V_STOP:
             self.next_player = (next_player + 1)%self.num_players
