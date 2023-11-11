@@ -21,7 +21,7 @@ class Card(IntFlag):
     V_7 = 1<<12
     V_8 = 1<<13
     V_9 = 1<<14
-    V_STOP = 1<<15
+    V_SKIP = 1<<15
     V_REVERSE = 1<<16
     V_PLUS_TWO = 1<<17
     V_PLUS_FOUR = 1<<18
@@ -32,7 +32,7 @@ class Card(IntFlag):
         if len(vals) > 1:
             return f"{vals[0].capitalize()[0]}{vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
-            return f"Wildcard: {vals[0].replace('V_', '').replace('_', ' ').capitalize()}"
+            return "W4" if self & Card.V_PLUS_FOUR else "WC"
     
     def __str__(self) -> str:
         return self.__repr__()
