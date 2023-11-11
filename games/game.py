@@ -122,10 +122,10 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     """
     r_val = None
     if game_id == "uno":
-        import uno
+        import games.uno as uno
         r_val = uno.Uno(players)
     elif game_id == "sal":
-        import sal
+        import games.sal as sal
         r_val =  sal.SnakesAndLadders(players)
     
     return None if (not r_val or not r_val.is_valid_playercount()) else r_val

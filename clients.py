@@ -1,5 +1,5 @@
 import secrets
-
+from games.game import create_game as cg
 
 class Clients:
     """Holds al client games"""
@@ -9,7 +9,7 @@ class Clients:
         self.games = {}
         self.parties = {}
 
-        self.valid_games = ["uno"]
+        self.valid_games = ["uno", "sal"]
 
     # USEFUL FUNCTIONS
     def is_user(self, client_id: str):
@@ -20,6 +20,9 @@ class Clients:
     
     def is_in_party(self, client_id: str, party_id: str):
         return client_id in self.parties[party_id]
+    
+    def is_leader(self, client_id: str, party_id: str):
+        return client_id == self.parties[party_id][0]
 
     def get_player_name(self, player_id: str):
         """Attempt to get player name"""
@@ -76,7 +79,7 @@ class Clients:
                 return False, None
 
             print("Player can join a party, checking if party exists...")
-            if self.is_party(party_id) and self.is_in_party(client_id, party_id):
+            if self.is_party(party_id) and not self.is_in_party(client_id, party_id):
                 self.parties[party_id].append(client_id)
 
                 print(f"Added player to party => {self.parties[party_id]}")
@@ -106,19 +109,27 @@ class Clients:
     
     def create_game(self, party_id: str, client_id: str, game_id: str):
         """Attempt to create a game"""
-        if client_id in self.clients.keys():
+        if self.is_user(client_id) and self.is_leader(client_id, party_id):
             print("Checking if player is in party and is party leader...")
-            for party in self.parties:
-                if client_id in party and party[0] == client_id:
-                    print("Checking if game id is valid!")
-                    
-                    # Check if game is valid and attempt to create
-                    if game_id in self.valid_games:
-                        pass
-        return False
+            if self.is_party(party_id) and self.is_in_party(client_id, party_id):
+                print("Checking if game id is valid!")
+                
+                # Check if game is valid and attempt to create
+                if game_id in self.valid_games:
+                    game = cg(game_id, self.clients.keys())
+                    print(game)
+        return False, None
+    
+    def get_game_state(self, party_id: str, client_id: str, game_id: str):
+        """Returns the current game state for that player"""
+        pass
+
+    def update_game_state(self, party_id: str, client_id: str, game_id: str, game_state):
+        """Attempts to update game state"""
+        pass
 
 
-
+# Other useful functions
 def make_random_not_in_list(list: list, length: int = 3):
     """Try find a random code that is not in a list"""
     found = False
