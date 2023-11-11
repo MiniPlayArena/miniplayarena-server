@@ -211,6 +211,7 @@ class Uno(Game):
             bool: can the card be played?
         """
         top_card = self.get_top_card()
+
         # if the colour was just changed, only check for colour
         if top_card & Card.V_PLUS_FOUR or top_card & Card.V_CHANGE_COLOUR:
             return Uno.are_same_colour(played_card, self.c_col_card)
@@ -310,7 +311,3 @@ class Uno(Game):
             ]
         }
     
-if __name__ == "__main__":
-    u = Uno(2)
-    print(u.get_player_data(0))
-    u.play_game()
