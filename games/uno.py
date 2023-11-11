@@ -289,7 +289,7 @@ class Uno(Game):
         """
         return {
             "next_player": self.get_player_id(self.next_player),
-            "c_facing_card": self.get_top_card(),
+            "c_facing_card": str(self.get_top_card()),
             "c_hand": [
                 str(card) for card in self.user_hands[player]
             ]
