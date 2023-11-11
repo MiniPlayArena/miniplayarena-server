@@ -29,10 +29,16 @@ class Card(IntFlag):
 
     def __repr__(self) -> str:
         vals = self.name.replace('CL_', '').split("|")
+        if self & Card.V_SKIP:
+            return f"{vals[0].capitalize()[0]}S"
+        if self & Card.V_REVERSE:
+            return f"{vals[0].capitalize()[0]}R"
+        if self & Card.V_PLUS_TWO:
+            return f"{vals[0].capitalize()[0]}+"
         if len(vals) > 1:
             return f"{vals[0].capitalize()[0]}{vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
-            return "W4" if self & Card.V_PLUS_FOUR else "WC"
+            return "W+" if self & Card.V_PLUS_FOUR else "WC"
     
     def __str__(self) -> str:
         return self.__repr__()
