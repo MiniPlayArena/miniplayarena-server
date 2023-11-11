@@ -54,7 +54,7 @@ BASE_UNO_DECK: (int) = tuple(
 
 class Uno(Game):
 
-    def __init__(self, num_players: int):
+    def __init__(self, players: [str]):
 
         super().__init__(10, "Uno", num_players)
         if not self.is_valid_playercount(num_players):
@@ -191,7 +191,6 @@ class Uno(Game):
 
     def randomise_cards(self) -> [int]:
         """ Gets an entire deck of Uno cards in a random order
-        TODO: implement :D
         """
         global BASE_UNO_DECK
         r_val = list(BASE_UNO_DECK)

@@ -1,11 +1,11 @@
 from game import Game
 import random
 
-class SnakesAndLadders(Game):
+class SnakesAndLadders():
     
 
-    def __init__(self, num_players: int):
-        super().__init__(4, "Snakes and Ladders", num_players)
+    def __init__(self, players: [str]):
+        super().__init__(4, "Snakes and Ladders", players)
         # If a board number has a value, then landing on that square jumps you to the position
         self.snakes_and_ladders = {
             97: 78,
