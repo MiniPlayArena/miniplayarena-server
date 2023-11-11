@@ -43,7 +43,7 @@ class Card(IntFlag):
 global ALL_COLOURS, NUMERICAL_VALUES, BASE_UNO_DECK
 ALL_COLOURS = (Card.CL_BLUE, Card.CL_GREEN, Card.CL_RED, Card.CL_YELLOW)
 ALL_NUMBERS = (Card.V_0, Card.V_1, Card.V_2, Card.V_3, Card.V_4, Card.V_5,
-               Card.V_6, Card.V_7, Card.V_8, Card.V_9, Card.V_STOP, Card.V_PLUS_TWO, Card.V_REVERSE)
+               Card.V_6, Card.V_7, Card.V_8, Card.V_9, Card.V_SKIP, Card.V_PLUS_TWO, Card.V_REVERSE)
 NUMERICAL_VALUES = (Card.V_0)
 BASE_UNO_DECK: (int) = tuple(
     [val | col for val in ALL_NUMBERS for i in range(2) for col in ALL_COLOURS] + 
@@ -137,7 +137,7 @@ class Uno(Game):
         elif card & Card.V_PLUS_TWO:
             #TODO: Implement logic for stacking +2s
             self.give_cards(next_player, 2)
-        elif card & Card.V_STOP:
+        elif card & Card.V_SKIP:
             self.next_player = (next_player + 1)%self.num_players
         elif card & Card.V_REVERSE:
             self.reversed = not self.reversed
