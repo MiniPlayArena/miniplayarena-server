@@ -11,7 +11,7 @@ class Game:
         self.name = name
         self.current_player = 0
         self.next_player = 1
-        self.winner = -1
+        self.winner = ""
         
     def update_player_pointers(self, reverse: bool=False) -> None:
         """ Updates the player pointers once a turn has been taken
@@ -96,7 +96,7 @@ class Game:
         return self.player_constraints[0] <= self.num_players <= self.player_constraints[1]
 
 
-    def game_is_won(self) -> bool:
+    def game_is_won(self) -> str:
         """Gets whether or not the game has been won
         
         args:
