@@ -1,20 +1,17 @@
-import pusher
 from flask import Flask
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_socketio import SocketIO
+from clients import Clients
 
 app = Flask(__name__)
+app.config["SECRET_KEY"] = "cum-monster"
 limiter = Limiter(get_remote_address, app=app, default_limits=["5 per second"], storage_uri="memory://")
-pusher = pusher.Pusher(
-    app_id = "1706778",
-    key = "7ccf4bc1ee9c8d02d536",
-    secret = "e7663f8d9b97f6442b07",
-    cluster = "eu"
-)
-# pusher.trigger(u"test-uno", u"init", {u"users": [u"user-1", u"user-2"]})
+clients = Clients()
+socketio = SocketIO(app)
 
 if __name__ == "__main__":
-    from endpoints.auth import auth
-    app.register_blueprint(auth)
+    from endpoints.auth import new_game
+    app.register_blueprint(new_game)
     
-    app.run(port=696, host="0.0.0.0")
+    socketio.run(app, port=696, host="0.0.0.0", debug=True)
