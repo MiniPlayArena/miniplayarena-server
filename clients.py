@@ -1,5 +1,6 @@
 import secrets
 from games.game import create_game as cg
+from games.game import Game
 
 class Clients:
     """Holds al client games"""
@@ -23,6 +24,9 @@ class Clients:
     
     def is_leader(self, client_id: str, party_id: str):
         return client_id == self.parties[party_id][0]
+    
+    def is_game_playing(self, party_id: str):
+        return party_id in self.games.keys()
 
     def get_player_name(self, player_id: str):
         """Attempt to get player name"""
@@ -47,10 +51,9 @@ class Clients:
         pass
 
     # OTHER STUFF
-
     def create_player(self, client_id: str, username: str) -> bool:
         """Add player to clients list"""
-        if not self.is_user(client_id) and len(username) > 3:
+        if not self.is_user(client_id) and 12 > len(username) > 3:
             self.clients[client_id] = username
             print(f"Added player! {client_id} => {username}")
             return True
@@ -116,13 +119,24 @@ class Clients:
                 
                 # Check if game is valid and attempt to create
                 if game_id in self.valid_games:
-                    game = cg(game_id, self.clients.keys())
-                    print(game)
+                    game = cg(game_id, list(self.clients.keys()))
+                    print(f"Game created: {game}")
+                    if game is not None:
+                        self.games[party_id] = game
+                        return True, self.create_party_output(party_id)
         return False, None
     
     def get_game_state(self, party_id: str, client_id: str, game_id: str):
         """Returns the current game state for that player"""
-        pass
+        if self.is_user(client_id):
+            print("Checking if the player is in the correct party...")
+            if self.is_party(party_id) and self.is_in_party(client_id, party_id):
+                print("Checking if correct game is being played")
+                if self.is_game_playing(party_id):
+                    game: Game = self.games[party_id]
+                    game_status = game.get_client_data(client_id)
+                    return True, game_status
+        return False, None
 
     def update_game_state(self, party_id: str, client_id: str, game_id: str, game_state):
         """Attempts to update game state"""
