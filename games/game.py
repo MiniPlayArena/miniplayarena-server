@@ -34,7 +34,7 @@ class Game:
         """
         return self.current_player
 
-    def get_client_data(self, player: int) -> dict:
+    def get_client_data(self, player: str) -> dict:
         """Gets all the data that the player needs at a given time point as a JSON encoded dict
         
         Called at the end of take_turn, but can be called whenever you want to explicitly
@@ -66,7 +66,7 @@ class Game:
         returns:
             Json dictionary with the entire game state. Dont send this to all players please :D
         """
-        return {"game-state": [self.get_client_data(i) for i in range(self.num_players)]}
+        return {"game-state": {player: self.get_client_data(player) for player in self.players}}
 
     def take_turn(self, incoming_player: int, turn_data: dict) -> dict:
         """Updates the game state based on what the player has sent
