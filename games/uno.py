@@ -56,13 +56,11 @@ class Uno(Game):
 
     def __init__(self, players: [str]):
 
-        super().__init__(10, "Uno", num_players)
-        if not self.is_valid_playercount(num_players):
-            return
+        super().__init__(10, "Uno", players)
         
         # Game setup
         self.draw_pile = self.randomise_cards()
-        self.user_hands = list([] for i in range(num_players))
+        self.user_hands = {player: [] for player in self.players}
 
         self.deal_hands(self.num_players)
         self.discard_pile = [self.draw_next_card()]                # stack
@@ -74,22 +72,8 @@ class Uno(Game):
         self.next_player = 1        # needed as can be skipped by certain cards
         self.reversed = False
         self.c_col_card = None
-
     
-    def update_player_index(self) -> None:
-        """ Updates the current and next player based on the current rules in play
-        
-        args:
-            None
-
-        returns:
-            None
-        """
-        self.current_player = self.next_player
-        n_player = self.next_player - 1 if self.reversed else self.next_player + 1
-        self.next_player = n_player % self.num_players
-    
-    def take_turn(self, current_player: int, turn_data: dict) -> bool:
+    def take_turn(self, current_player: str, turn_data: dict) -> bool:
         """Takes a turn given the current player and the player that will bare the 
         results of the player's actions
 
@@ -133,7 +117,7 @@ class Uno(Game):
         self.do_card(card, self.next_player)
 
         # update current player and next player pointers
-        self.update_player_index()
+        self.update_player_pointers(self.reversed)
 
         # re-generate data as the state has changed
         return self.get_all_client_data()
@@ -298,7 +282,7 @@ class Uno(Game):
         self.c_col_card =  Card(int(input("What colour? 1, 2, 4 or 8")))
     
 
-    def get_player_data(self, player: int) -> dict:
+    def get_player_data(self, player: str) -> dict:
         """For Uno, the player data that is needed for each individual client is:
         The current top of the discard pile (c_facing_card)
         And the player's current hand (c_hand)
