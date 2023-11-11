@@ -8,8 +8,8 @@ app = Flask(__name__)
 app.config["SECRET_KEY"] = "cum-monster"
 
 limiter = Limiter(get_remote_address, app=app, default_limits=["5 per second"], storage_uri="memory://")
-clients = Clients()
 socketio = SocketIO(app, cors_allowed_origins="*")
+clients = Clients()
 
 
 if __name__ == "__main__": 
