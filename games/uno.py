@@ -139,7 +139,9 @@ class Uno(Game):
         for player in self.user_hands:
             if len(self.user_hands[player] != 0):
                 count +=1
-        return count < 2, self.winner
+        c_data = self.get_all_client_data()
+        r_val = {p.update({"winner": self.winner}): c_data[p] for p in c_data}
+        return count < 2, r_val
 
     def do_card(self, card: int, next_player: int, play_data: dict):
         """ Applies the result of a special card
