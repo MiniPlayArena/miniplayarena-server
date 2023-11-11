@@ -71,7 +71,7 @@ class Uno(Game):
         self.c_col_card = None
 
          # apply the result of the first card TODO: if this is change colour then we are fucked
-        self.do_card(self.get_top_card(), 0, {})
+        self.do_card(self.get_top_card(), 0, {"action-change-colour": 8})
     
     def take_turn(self, current_player: str, turn_data: dict) -> bool:
         """Takes a turn given the current player and the player that will bare the 
