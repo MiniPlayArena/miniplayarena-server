@@ -219,7 +219,7 @@ class Uno(Game):
         returns:
             None
         """
-        self.user_hands[player] += [self.draw_next_card() for i in range(num_cards)]
+        self.user_hands[self.get_player_id(player)] += [self.draw_next_card() for i in range(num_cards)]
     
     def deal_hands(self, num_players: int) -> [Card]:
         """ Draws 7 cards for each player
