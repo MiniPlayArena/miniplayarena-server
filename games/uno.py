@@ -153,6 +153,14 @@ class Uno(Game):
 
 
     def can_play(self, player: int) -> bool:
+        """Checks if a player can actually place a card
+
+        args:
+            player(int): the player to check
+
+        return:
+            (bool) whether or not the player can play
+        """
         return any(map(self.can_play_card, self.user_hands[player]))
 
 
@@ -280,6 +288,10 @@ class Uno(Game):
     
 
     def get_player_data(self, player: int) -> dict:
+        """For Uno, the player data that is needed for each individual client is:
+        The current top of the discard pile (c_facing_card)
+        And the player's current hand (c_hand)
+        """
         return {
             "c_facing_card": self.get_top_card(),
             "c_hand": [
