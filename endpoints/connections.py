@@ -119,7 +119,7 @@ def leave_party(data):
 def create_game(data):
     """Attempt to create game"""
     try:
-        success, party = clients.create_game(data["partyId"], data["clientId"], data["gameId"])
+        success, party, err = clients.create_game(data["partyId"], data["clientId"], data["gameId"])
         party_leader = None if party is None else list(party.keys())[0]
 
         if success:
@@ -131,6 +131,13 @@ def create_game(data):
                     "firstPlayer": party_leader
                 },
                 to = data["partyId"]
+            )
+        elif err is not None:
+            emit(
+                "error",
+                {
+                    "message": err
+                }
             )
         else:
             emit(

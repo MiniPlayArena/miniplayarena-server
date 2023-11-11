@@ -119,12 +119,13 @@ class Clients:
                 
                 # Check if game is valid and attempt to create
                 if game_id in self.valid_games:
-                    game = cg(game_id, list(self.clients.keys()))
+                    game, err = cg(game_id, list(self.clients.keys()))
                     print(f"Game created: {game}")
                     if game is not None:
                         self.games[party_id] = game
-                        return True, self.create_party_output(party_id)
-        return False, None
+                        return True, self.create_party_output(party_id), None
+                    return False, None, err
+        return False, None, None
     
     def get_game_state(self, party_id: str, client_id: str, game_id: str):
         """Returns the current game state for that player"""
