@@ -1,5 +1,3 @@
-
-
 class Game:
 
     def __init__(self, max_players: int, name: str, num_players: int, min_players: int = 2):
@@ -78,5 +76,13 @@ class Game:
 
 
     def game_is_won(self) -> bool:
+        """Gets whether or not the game has been won
+        
+        args:
+            None
+
+        returns:
+            The condition of the game
+        """
         raise NotImplementedError("Please implement a win condition")
         
