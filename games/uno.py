@@ -4,28 +4,28 @@ import random
 
 
 class Card(IntFlag):
-    """ Flags for different parts of an uno card
-    """
-    CL_RED = 1<<0
-    CL_GREEN = 1<<1
-    CL_YELLOW = 1<<2
-    CL_BLUE = 1<<3
+    """Flags for different parts of an uno card"""
 
-    V_0 = 1<<5
-    V_1 = 1<<6
-    V_2 = 1<<7
-    V_3 = 1<<8
-    V_4 = 1<<9
-    V_5 = 1<<10
-    V_6 = 1<<11
-    V_7 = 1<<12
-    V_8 = 1<<13
-    V_9 = 1<<14
-    V_SKIP = 1<<15
-    V_REVERSE = 1<<16
-    V_PLUS_TWO = 1<<17
-    V_PLUS_FOUR = 1<<18
-    V_CHANGE_COLOUR = 1<<19
+    CL_RED = 1 << 0
+    CL_GREEN = 1 << 1
+    CL_YELLOW = 1 << 2
+    CL_BLUE = 1 << 3
+
+    V_0 = 1 << 5
+    V_1 = 1 << 6
+    V_2 = 1 << 7
+    V_3 = 1 << 8
+    V_4 = 1 << 9
+    V_5 = 1 << 10
+    V_6 = 1 << 11
+    V_7 = 1 << 12
+    V_8 = 1 << 13
+    V_9 = 1 << 14
+    V_SKIP = 1 << 15
+    V_REVERSE = 1 << 16
+    V_PLUS_TWO = 1 << 17
+    V_PLUS_FOUR = 1 << 18
+    V_CHANGE_COLOUR = 1 << 19
 
     @staticmethod
     def from_packet(c: str):
@@ -34,18 +34,21 @@ class Card(IntFlag):
         elif c == "WC":
             return Card.V_CHANGE_COLOUR
         col = f"CL_{c[0].replace('R', 'RED').replace('G', 'GREEN').replace('Y', 'YELLOW').replace('B', 'BLUE')}"
-        
-        if c[1] == '+':
+
+        if c[1] == "+":
             return Card[col] | Card.V_PLUS_TWO
-        elif c[1] == 'S':
+        elif c[1] == "S":
             return Card[col] | Card.V_SKIP
-        elif c[1] == 'R':
+        elif c[1] == "R":
             return Card[col] | Card.V_REVERSE
         else:
             return Card[col] | Card[f"V_{c[1]}"]
+        
+    def get_colour(self) -> str:
+        return self.name.replace("CL_", "").split("|")[0].upper()[0]
 
     def __repr__(self) -> str:
-        vals = self.name.replace('CL_', '').split("|")
+        vals = self.name.replace("CL_", "").split("|")
         if self & Card.V_SKIP:
             return f"{vals[0].capitalize()[0]}S"
         if self & Card.V_REVERSE:
@@ -56,50 +59,55 @@ class Card(IntFlag):
             return f"{vals[0].capitalize()[0]}{vals[1].replace('V_', '').replace('_', ' ').capitalize()}"
         else:
             return "W+" if self & Card.V_PLUS_FOUR else "WC"
-    
+
     def __str__(self) -> str:
         return self.__repr__()
 
 
-
 # Uno Constants
-global ALL_COLOURS, NUMERICAL_VALUES, BASE_UNO_DECK
+global ALL_COLOURS, BASE_UNO_DECK
 ALL_COLOURS = (Card.CL_BLUE, Card.CL_GREEN, Card.CL_RED, Card.CL_YELLOW)
-ALL_NUMBERS = (Card.V_0, Card.V_1, Card.V_2, Card.V_3, Card.V_4, Card.V_5,
-               Card.V_6, Card.V_7, Card.V_8, Card.V_9, Card.V_SKIP, Card.V_PLUS_TWO, Card.V_REVERSE)
-NUMERICAL_VALUES = (Card.V_0)
+ALL_NUMBERS = (
+    Card.V_0,
+    Card.V_1,
+    Card.V_2,
+    Card.V_3,
+    Card.V_4,
+    Card.V_5,
+    Card.V_6,
+    Card.V_7,
+    Card.V_8,
+    Card.V_9,
+    Card.V_SKIP,
+    Card.V_PLUS_TWO,
+    Card.V_REVERSE,
+)
 BASE_UNO_DECK: (int) = tuple(
-    [val | col for val in ALL_NUMBERS for i in range(2) for col in ALL_COLOURS] + 
-    [Card.V_CHANGE_COLOUR for i in range(4)] + 
-    [Card.V_PLUS_FOUR for i in range(4)]
+    [val | col for val in ALL_NUMBERS for i in range(2) for col in ALL_COLOURS]
+    + [Card.V_CHANGE_COLOUR for i in range(4)]
+    + [Card.V_PLUS_FOUR for i in range(4)]
 )
 
 
 class Uno(Game):
-
     def __init__(self, players: [str]):
-
         super().__init__(10, "Uno", players)
-        
+
         # Game setup
         self.draw_pile = self.randomise_cards()
         self.user_hands = {player: [] for player in self.players}
 
         self.deal_hands(self.num_players)
-        self.discard_pile = [self.draw_next_card()]                # stack
-
-        # make sure first card is not wildcard
-        while self.is_invalid_starter(self.get_top_card()):
-            self.discard_pile = [self.draw_next_card()]
+        self.draw_first_card()
         # inits
         self.reversed = False
         self.c_col_card = None
 
-         # apply the result of the first card TODO: if this is change colour then we are fucked
+        # apply the result of the first card TODO: if this is change colour then we are fucked
         self.do_card(self.get_top_card(), 0, {"action-change-colour": 8})
-    
+
     def take_turn(self, current_player: str, turn_data: dict) -> bool:
-        """Takes a turn given the current player and the player that will bare the 
+        """Takes a turn given the current player and the player that will bare the
         results of the player's actions
 
         args:
@@ -115,7 +123,9 @@ class Uno(Game):
         # if the current player is not the one that is allowed to play
         if current_player != self.get_player_id(self.current_player):
             print("Not current turn")
-            r_data["game-state"][current_player]["display_message"] = "It is not your turn to play!"
+            r_data["game-state"][current_player][
+                "display_message"
+            ] = "It is not your turn to play!"
             return r_data
 
         if "pick-card" in turn_data:
@@ -129,21 +139,23 @@ class Uno(Game):
         played_card = Card.from_packet(turn_data["played_card"])
         print(f"Player {current_player} played card {played_card}")
         if played_card not in self.user_hands[current_player]:
-            r_data["game-state"][current_player].update({"display_message": "You cannot play that card as you don't have it"})
+            r_data["game-state"][current_player].update(
+                {"display_message": "You cannot play that card as you don't have it"}
+            )
             return r_data
 
         # if they cannot play it then try this function again
         if not self.can_play_card(played_card):
             # re-add card to hand and return
             print("Can't play card :(")
-            r_data["game-state"][current_player]["display_message"] =  "Cannot play that card "
+            r_data["game-state"][current_player][
+                "display_message"
+            ] = "Cannot play that card "
             return r_data
 
         # since they can play the card, do the actions
         self.discard_pile.append(played_card)
-        print(self.user_hands[current_player])
         self.user_hands[current_player].remove(played_card)
-        print(self.user_hands[current_player])
         self.do_card(played_card, self.next_player, turn_data)
 
         if len(self.user_hands[current_player]) == 0 and self.winner == "":
@@ -152,8 +164,21 @@ class Uno(Game):
         # update current player and next player pointers
         self.update_player_pointers(self.reversed)
 
+        if len(self.draw_pile) == 0:
+            self.draw_pile = reversed(self.discard_pile)
+
+            self.draw_first_card()
+
         # re-generate data as the state has changed
         return self.get_all_client_data()
+
+
+    def draw_first_card(self):
+        self.discard_pile = [self.draw_next_card()]  # stack
+
+        # make sure first card is not wildcard
+        while self.is_invalid_starter(self.get_top_card()):
+            self.discard_pile = [self.draw_next_card()]
 
     def has_won(self, player: int) -> bool:
         return len(self.user_hands[player]) == 0
@@ -162,29 +187,27 @@ class Uno(Game):
         count = 0
         for player in self.user_hands:
             if len(self.user_hands[player]) != 0:
-                count +=1
-        #TODO: do this please
-        #return count < 2, self.get_final_gamestate()
+                count += 1
+        # TODO: do this please
+        # return count < 2, self.get_final_gamestate()
         return False, {}
 
     def do_card(self, card: int, next_player: int, play_data: dict):
-        """ Applies the result of a special card
-        """
+        """Applies the result of a special card"""
         if card & Card.V_PLUS_FOUR:
             self.give_cards(next_player, 4)
             self.change_colour(play_data["action-change-colour"])
         elif card & Card.V_PLUS_TWO:
-            #TODO: Implement logic for stacking +2s
+            # TODO: Implement logic for stacking +2s
             self.give_cards(next_player, 2)
         elif card & Card.V_SKIP:
-            self.next_player = (next_player + 1)%self.num_players
+            self.next_player = (next_player + 1) % self.num_players
         elif card & Card.V_REVERSE:
             self.reversed = not self.reversed
             n_player = self.next_player - 1 if self.reversed else self.next_player + 1
             self.next_player = n_player % self.num_players
         elif card & Card.V_CHANGE_COLOUR:
             self.change_colour(play_data["action-change-colour"])
-
 
     def can_play(self, player: int) -> bool:
         """Checks if a player can actually place a card
@@ -197,38 +220,34 @@ class Uno(Game):
         """
         return any(map(self.can_play_card, self.user_hands[player]))
 
-
     def get_user_choice(self, player: int) -> int:
-        print(f"\nThe top card is {self.get_top_card()}, player {player} what do you play?")
+        print(
+            f"\nThe top card is {self.get_top_card()}, player {player} what do you play?"
+        )
         hand = self.user_hands[player]
         print(f"Your cards are: {hand}")
         return int(input("What do you want to play? >> "))
-    
 
     def get_top_card(self) -> Card:
-        """ Gets the card that is currently facing the board
-        """
+        """Gets the card that is currently facing the board"""
         c = Card(self.discard_pile[-1])
         return c
 
-
     def randomise_cards(self) -> [int]:
-        """ Gets an entire deck of Uno cards in a random order
-        """
+        """Gets an entire deck of Uno cards in a random order"""
         global BASE_UNO_DECK
         r_val = list(BASE_UNO_DECK)
         random.shuffle(r_val)
         return r_val
-    
-    
+
     def can_play_card(self, played_card: Card) -> bool:
-        """ Checks if the played card is allowed based on the current top card
+        """Checks if the played card is allowed based on the current top card
 
         args:
             played_card (Card): the card that is being played (duh)
 
-        EITHER: 
-        
+        EITHER:
+
         returns:
             bool: can the card be played?
         """
@@ -239,48 +258,52 @@ class Uno(Game):
             return Uno.are_same_colour(played_card, self.c_col_card)
 
         # else check for same colour, value or wildcard being played
-        return Uno.are_same_colour(played_card, top_card) or \
-                Uno.are_same_value(played_card, top_card) or\
-                Uno.is_wildcard(played_card)
-    
+        return (
+            Uno.are_same_colour(played_card, top_card)
+            or Uno.are_same_value(played_card, top_card)
+            or Uno.is_wildcard(played_card)
+        )
+
     def draw_next_card(self) -> Card:
-        """Draw the next card from the draw pile
-        """
+        """Draw the next card from the draw pile"""
         return self.draw_pile.pop(-1)
-    
+
     def give_cards(self, player: int, num_cards: int) -> None:
         """Adds a number of cards to the player's hand
 
         args:
             player(int): the player to add the cards to
             num_cards(int): the number of cards to give the player
-        
+
         returns:
             None
         """
-        self.user_hands[self.get_player_id(player)] += [self.draw_next_card() for i in range(num_cards)]
-    
+        self.user_hands[self.get_player_id(player)] += [
+            self.draw_next_card() for i in range(num_cards)
+        ]
+
     def deal_hands(self, num_players: int) -> [Card]:
-        """ Draws 7 cards for each player
-        """
+        """Draws 7 cards for each player"""
         for player in range(num_players):
             self.give_cards(player, 7)
-    
+
     @staticmethod
     def is_invalid_starter(card: int) -> bool:
-        return Uno.is_wildcard(card) or \
-            card & Card.V_PLUS_TWO or \
-            card & Card.V_SKIP or \
-            card & Card.V_REVERSE
-    
+        return (
+            Uno.is_wildcard(card)
+            or card & Card.V_PLUS_TWO
+            or card & Card.V_SKIP
+            or card & Card.V_REVERSE
+        )
+
     @staticmethod
     def are_same_colour(card1: int, card2: int) -> bool:
-        """ Checks if two cards have the same colour flag bit set
+        """Checks if two cards have the same colour flag bit set
 
         args:
             card1: The first card to perform the comparison with
             card2: The second card to perform the comparison with
-        
+
         returns:
             true if the cards have the same colour, otherwise false
         """
@@ -294,11 +317,11 @@ class Uno(Game):
         args:
             card1: The first card to perform the comparison with
             card2: The second card to perform the comparison with
-        
+
         returns:
             true if the cards have the same value, otherwise false
         """
-        mask = ((1<<18) - 1) &~15
+        mask = ((1 << 18) - 1) & ~15
         return card1 & mask == card2 & mask
 
     @staticmethod
@@ -308,15 +331,14 @@ class Uno(Game):
 
         args:
             card(int): the card to check
-        
+
         returns:
             bool: whether the card is a wildcard (+4 or colour change)
         """
         return not card & 15
 
-
-    def change_colour(self, colour: int) -> None:
-        """ Changes the colour without changing the top card, as needed when +4 and colour change
+    def change_colour(self, colour: str) -> None:
+        """Changes the colour without changing the top card, as needed when +4 and colour change
         cards are used
 
         args:
@@ -325,20 +347,18 @@ class Uno(Game):
         returns:
             The card with just the colour
         """
-        self.c_col_card =  Card(colour)
-    
+        return Card[f"C_{colour.upper()}"]
 
     def get_client_data(self, player: str) -> dict:
         """For Uno, the player data that is needed for each individual client is:
         The current top of the discard pile (c_facing_card)
         And the player's current hand (c_hand)
         """
+        current_colour = self.c_col_card.get_colour() if Uno.is_wildcard(self.get_top_card()) else self.get_top_card().get_colour()
         return {
             "current_player": self.get_player_id(self.current_player),
             "c_facing_card": str(self.get_top_card()),
-            "c_hand": [
-                str(card) for card in self.user_hands[player]
-            ],
-            "display_message": ""
+            "c_hand": [str(card) for card in self.user_hands[player]],
+            "c_colour": current_colour,
+            "display_message": "",
         }
-    
