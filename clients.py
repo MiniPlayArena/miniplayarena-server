@@ -163,16 +163,18 @@ class Clients:
                 # Update game status
                 if self.is_game_playing(party_id):
                     print("Game found, sending game status!")
+                    print(f"Party ID: {party_id}, {self.games}")
                     game: Game = self.games[party_id]
+                    print(f"Game found: {game}")
                     game_status = game.take_turn(client_id, game_state)
-
+                    print("Took turn")
                     # Check if game is won
                     has_won, won_status = game.game_is_won()
                     if has_won:
                         print("Game is over!")
-                        return True, won_status
-                    return True, game_status
-        return False, None
+                        return True, won_status, ""
+                    return True, game_status, ""
+        return False, None, ""
     
     def delete_game(self, party_id: str, client_id: str):
         if self.is_user(client_id):
