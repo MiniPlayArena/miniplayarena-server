@@ -24,7 +24,6 @@ clients = Clients()
 def index():
     return "<h1>kushy wushy >~<</h1>"
 
-
 if __name__ == "__main__":
     import endpoints.connections as _  # noqa: F401
 
