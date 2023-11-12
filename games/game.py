@@ -10,7 +10,7 @@ class Game:
 
         self.name = name
         self.current_player = 0
-        self.next_player = 1 if len(self.players) > 1 else 0
+        self.next_player = 1 % len(self.players)
         self.winner = ""
         
     def update_player_pointers(self, reverse: bool=False) -> None:
