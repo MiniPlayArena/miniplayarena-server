@@ -20,18 +20,20 @@ class Game:
         args:
             reverse(bool): Whether or not the direction of players should be cw (false) or acw (true)
         """
-        self.current_player = self.next_player % self.num_players
+        self.current_player = self.next_player
         self.next_player += -1 if reverse else 1
         self.next_player  = self.next_player % self.num_players
         while self.get_player_id(self.current_player) in self.winners:
             print(f"{self.current_player} has won")
-            self.current_player = self.next_player % self.num_players
+            self.current_player = self.next_player
             self.next_player += -1 if reverse else 1
             self.next_player  = self.next_player % self.num_players
         
-        while self.get_player_id(self.next_player) in self.winners:
+        while self.next_player == self.current_player or self.get_player_id(self.next_player) in self.winners:
+            print("Updating next player as won")
             self.next_player += -1 if reverse else 1
-            self.next_player  = self.next_player % self.num_players
+            self.next_player = self.next_player % self.num_players
+        print(f"c player is now {self.current_player} and n player is now {self.next_player}")
 
     def get_active_player(self) -> int:
         """Gets the player who's turn it is next.
