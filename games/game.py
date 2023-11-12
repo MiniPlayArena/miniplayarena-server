@@ -96,6 +96,11 @@ class Game:
         return self.player_constraints[0] <= self.num_players <= self.player_constraints[1]
 
 
+    def get_final_gamestate(self) -> dict:
+        c_data = self.get_all_client_data()
+        return {p.update({"winner": self.winner}): c_data[p] for p in c_data}
+
+
     def game_is_won(self) -> str:
         """Gets whether or not the game has been won
         

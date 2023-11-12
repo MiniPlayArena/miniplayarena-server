@@ -64,6 +64,9 @@ class SnakesAndLadders(Game):
         r_data = self.get_all_client_data()
         r_data.update({"num-rolled": roll})
         return 
+    
+    def game_is_won(self) -> str:
+        return self.winner != "", self.get_final_gamestate()
 
 if __name__ == "__main__":
     s = SnakesAndLadders(2)
