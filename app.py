@@ -20,6 +20,10 @@ limiter = Limiter(
 socketio = SocketIO(app, cors_allowed_origins="*")
 clients = Clients()
 
+@app.route("/")
+def index():
+    return "<h1>kushy wushy >~<</h1>"
+
 
 if __name__ == "__main__":
     import endpoints.connections as _  # noqa: F401
