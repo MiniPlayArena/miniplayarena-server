@@ -2,6 +2,7 @@ import uuid
 from flask_socketio import emit, join_room, leave_room
 from __main__ import socketio, clients
 
+
 @socketio.on("connect")
 def connection():
     print("Client connected!")
@@ -49,11 +50,7 @@ def create_party(data):
             join_room(party_id)
             emit(
                 "party-created",
-                {
-                    "partyId": party_id,
-                    "partyLeader": party_leader,
-                    "players": party
-                },
+                {"partyId": party_id, "partyLeader": party_leader, "players": party},
             )
         else:
             emit("error", {"message": "party was not created"})
@@ -68,7 +65,7 @@ def join_party(data):
         success, party = clients.join_party(data["partyId"], data["clientId"])
         party_leader = None if party is None else list(party.keys())[0]
 
-        if success: 
+        if success:
             join_room(data["partyId"])
             emit(
                 "joined-party",
@@ -78,7 +75,7 @@ def join_party(data):
                     "partyLeader": party_leader,
                     "players": party,
                 },
-                to = data["partyId"]
+                to=data["partyId"],
             )
         else:
             emit(
@@ -107,7 +104,7 @@ def leave_party(data):
                     "partyLeader": party_leader,
                     "players": party,
                 },
-                to = data["partyId"]
+                to=data["partyId"],
             )
             leave_room(data["partyId"])
         else:
@@ -125,7 +122,9 @@ def leave_party(data):
 def create_game(data):
     """Attempt to create game"""
     try:
-        success, party, err = clients.create_game(data["partyId"], data["clientId"], data["gameId"])
+        success, party, err = clients.create_game(
+            data["partyId"], data["clientId"], data["gameId"]
+        )
         party_leader = None if party is None else list(party.keys())[0]
 
         if success:
@@ -134,17 +133,12 @@ def create_game(data):
                 {
                     "partyId": data["partyId"],
                     "gameId": data["gameId"],
-                    "firstPlayer": party_leader
+                    "firstPlayer": party_leader,
                 },
-                to = data["partyId"]
+                to=data["partyId"],
             )
         elif err is not None:
-            emit(
-                "error",
-                {
-                    "message": err
-                }
-            )
+            emit("error", {"message": err})
         else:
             emit(
                 "error",
@@ -160,19 +154,22 @@ def create_game(data):
 def pickup_card(data):
     print("Picking up card")
     try:
-        success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], {"pick-card": True})
+        success, game_state, error_message = clients.update_game_state(
+            data["partyId"], data["clientId"], {"pick-card": True}
+        )
         print(f"Game state: {game_state}")
         if success:
             emit(
-                "game-state", 
+                "game-state",
                 {
                     "partyId": data["partyId"],
                     "gameId": data["gameId"],
-                    "gameState": game_state['game-state'][data["clientId"]]
-                }
+                    "gameState": game_state["game-state"][data["clientId"]],
+                },
             )
     except Exception as e:
         emit("error", {"message", e})
+
 
 @socketio.on("get-game-state")
 def get_game_state(data):
@@ -186,15 +183,13 @@ def get_game_state(data):
                 {
                     "partyId": data["partyId"],
                     "gameId": data["gameId"],
-                    "gameState": game_state
-                }
+                    "gameState": game_state,
+                },
             )
         else:
             emit(
                 "error",
-                {
-                    "message": "game state could not be found, is a game being played?"
-                }
+                {"message": "game state could not be found, is a game being played?"},
             )
     except Exception as e:
         emit("error", {"message", e})
@@ -205,16 +200,18 @@ def update_game_state(data):
     """Updates the game state if possible"""
     print("Tryignt o updated game stats")
     try:
-        success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], data["gameState"])
-        del game_state['game-state'][data["clientId"]]["display_message"]
+        success, game_state, error_message = clients.update_game_state(
+            data["partyId"], data["clientId"], data["gameState"]
+        )
+        del game_state["game-state"][data["clientId"]]["display_message"]
         if success:
             emit(
                 "game-state",
                 {
                     "partyId": data["partyId"],
                     "gameId": data["gameId"],
-                    "gameState": game_state['game-state'][data["clientId"]],
-                }
+                    "gameState": game_state["game-state"][data["clientId"]],
+                },
             )
             if error_message == "":
                 emit(
@@ -222,22 +219,14 @@ def update_game_state(data):
                     {
                         "partyId": data["partyId"],
                         "gameId": data["gameId"],
-                        "lastMove": data["clientId"] 
+                        "lastMove": data["clientId"],
                     },
-                    to = data["partyId"]
+                    to=data["partyId"],
                 )
             else:
-                emit("error",
-                     {
-                         "message": error_message
-                     })
+                emit("error", {"message": error_message})
         else:
-            emit(
-                "error",
-                {
-                    "message": error_message
-                }
-            )
+            emit("error", {"message": error_message})
     except Exception as e:
         emit("error", {"message": e})
 
@@ -249,19 +238,13 @@ def delete_game(data):
         success = clients.delete_game(data["partyId"], data["clientId"])
 
         if success:
-            emit(
-                "game-over",
-                {
-                    "partyId": data["partyId"]
-                },
-                to = data["partyId"]
-            )
+            emit("game-over", {"partyId": data["partyId"]}, to=data["partyId"])
         else:
             emit(
                 "error",
                 {
                     "message": "game could not be stopped, this could be due to the game not existing"
-                }
+                },
             )
     except Exception as e:
         emit("error", {"message": e})
