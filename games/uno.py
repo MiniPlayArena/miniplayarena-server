@@ -122,6 +122,8 @@ class Uno(Game):
         """
 
         print(f"Current player: {current_player}, Next Player: {self.get_player_id(self.next_player)}")
+        print(f"Current player: {self.get_player_index(current_player)}, Next Player: {self.next_player}")
+
 
         r_data = self.get_all_client_data()
 
@@ -170,7 +172,6 @@ class Uno(Game):
         print("Played card")
         if len(self.user_hands[current_player]) == 0 and current_player not in self.winners:
             self.winners.append(current_player)
-            self.num_players -= 1
             print(f"Player {current_player} has run out of cards")
 
         # update current player and next player pointers
@@ -302,6 +303,7 @@ class Uno(Game):
             print(f"Incremembting again as {self.next_player} is a winner")
             self.increment_next_player(1)
         print(f"Inremented to Current player: {self.get_player_id(self.current_player)}, Next Player: {self.get_player_id(self.next_player)}")
+        print(f"Inremented to Current player: {self.current_player}, Next Player: {self.next_player}")
 
     
     def can_still_play(self, player: str) -> bool:
