@@ -157,7 +157,7 @@ def pickup_card(data):
         success, game_state, error_message = clients.update_game_state(
             data["partyId"], data["clientId"], {"pick-card": True}
         )
-        print(f"Game state: {game_state}")
+        del game_state['game-state'][data["clientId"]]["display_message"]
         if success:
             emit(
                 "game-state",
@@ -167,6 +167,8 @@ def pickup_card(data):
                     "gameState": game_state["game-state"][data["clientId"]],
                 },
             )
+            if error_message != "":
+                emit("error", {"message": error_message})
     except Exception as e:
         emit("error", {"message", e})
 
