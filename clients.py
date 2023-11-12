@@ -2,6 +2,7 @@ import secrets
 from games.game import create_game as cg
 from games.game import Game
 
+
 class Clients:
     """Holds al client games"""
 
@@ -15,16 +16,16 @@ class Clients:
     # USEFUL FUNCTIONS
     def is_user(self, client_id: str):
         return client_id in self.clients.keys()
-    
+
     def is_party(self, party_id: str):
         return party_id in self.parties.keys()
-    
+
     def is_in_party(self, client_id: str, party_id: str):
         return client_id in self.parties[party_id]
-    
+
     def is_leader(self, client_id: str, party_id: str):
         return client_id == self.parties[party_id][0]
-    
+
     def is_game_playing(self, party_id: str):
         return party_id in self.games.keys()
 
@@ -33,13 +34,13 @@ class Clients:
         if player_id in self.clients.keys():
             return self.clients[player_id]
         return "not found"
-    
+
     def is_in_any_party(self, client_id: str):
         for party in self.parties:
             if client_id in self.parties[party]:
                 return True
         return False
-    
+
     def create_party_output(self, party_id: str):
         out = {}
         if self.is_party(party_id):
@@ -95,7 +96,7 @@ class Clients:
 
                 print(f"Added player to party => {self.parties[party_id]}")
                 return True, self.create_party_output(party_id)
-            
+
             print("Party does not exist")
         return False, None
 
@@ -117,14 +118,14 @@ class Clients:
             print("Party does not exist")
 
         return False, None
-    
+
     def create_game(self, party_id: str, client_id: str, game_id: str):
         """Attempt to create a game"""
         if self.is_user(client_id) and self.is_leader(client_id, party_id):
             print("Checking if player is in party and is party leader...")
             if self.is_party(party_id) and self.is_in_party(client_id, party_id):
                 print("Checking if game id is valid!")
-                
+
                 # Check if game is valid and attempt to create
                 if game_id in self.valid_games:
                     if self.is_game_playing(party_id):
@@ -137,7 +138,7 @@ class Clients:
                             return True, self.create_party_output(party_id), None
                     return False, None, err
         return False, None, None
-    
+
     def get_game_state(self, party_id: str, client_id: str):
         """Returns the current game state for that player"""
         if self.is_user(client_id):
@@ -172,10 +173,18 @@ class Clients:
                     has_won, won_status = game.game_is_won()
                     if has_won:
                         print("Game is over!")
-                        return True, won_status, won_status['game-state'][client_id]["display_message"]
-                    return True, game_status, game_status['game-state'][client_id]["display_message"]
+                        return (
+                            True,
+                            won_status,
+                            won_status["game-state"][client_id]["display_message"],
+                        )
+                    return (
+                        True,
+                        game_status,
+                        game_status["game-state"][client_id]["display_message"],
+                    )
         return False, None, ""
-    
+
     def delete_game(self, party_id: str, client_id: str):
         if self.is_user(client_id):
             print("Checking if user is in correct party...")
