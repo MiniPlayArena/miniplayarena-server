@@ -160,7 +160,7 @@ def create_game(data):
 def get_game_state(data):
     """Allows the user to get the games state"""
     try:
-        success, game_state = clients.get_game_state(data["partyId"], data["clientId"], data["gameId"])
+        success, game_state = clients.get_game_state(data["partyId"], data["clientId"])
 
         if success:
             emit(
@@ -221,7 +221,7 @@ def update_game_state(data):
 def delete_game(data):
     """Delete the game"""
     try:
-        success = clients.delete_game(data["partyId"])
+        success = clients.delete_game(data["partyId"], data["clientId"])
 
         if success:
             emit(

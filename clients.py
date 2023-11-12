@@ -47,13 +47,19 @@ class Clients:
                 out[client] = self.get_player_name(client)
         return out
 
-    def get_party_game(self, party_id: str):
-        pass
+    def kick_from_party(self, client_id: str):
+        for party in self.parties:
+            if client_id in self.parties[party]:
+                self.parties[party].remove(client_id)
+                if self.parties[party] == []:
+                    print("Deleting empty party!")
+                    self.parties.pop(party)
+                return
 
     # OTHER STUFF
     def create_player(self, client_id: str, username: str) -> bool:
         """Add player to clients list"""
-        if 12 > len(username) > 3:
+        if client_id is not None and 12 > len(username) > 3:
             self.clients[client_id] = username
             print(f"Added player! {client_id} => {username}")
             return True
@@ -64,7 +70,8 @@ class Clients:
         if self.is_user(party_leader):
             print("Checking if player is in a party...")
             if self.is_in_any_party(party_leader):
-                return False, None
+                print("Kicking player from old party!")
+                self.kick_from_party(party_leader)
 
             # Create party
             print("Creating party...")
@@ -72,14 +79,15 @@ class Clients:
             self.parties[party_id] = [party_leader]
             print(f"Party created {party_id} => {self.clients[party_leader]}")
             return True, party_id, self.create_party_output(party_id)
-        return False, None
+        return False, None, None
 
     def join_party(self, party_id: str, client_id: str):
         """Try make a user join a party"""
         if self.is_user(client_id):
             print("Checking if player is in a party...")
             if self.is_in_any_party(client_id):
-                return False, None
+                print("Kicking player from old party!")
+                self.kick_from_party(client_id)
 
             print("Player can join a party, checking if party exists...")
             if self.is_party(party_id) and not self.is_in_party(client_id, party_id):
@@ -130,7 +138,7 @@ class Clients:
                     return False, None, err
         return False, None, None
     
-    def get_game_state(self, party_id: str, client_id: str, game_id: str):
+    def get_game_state(self, party_id: str, client_id: str):
         """Returns the current game state for that player"""
         if self.is_user(client_id):
             print("Checking if the player is in the correct party...")
@@ -139,7 +147,7 @@ class Clients:
 
                 # Return correct game if found
                 if self.is_game_playing(party_id):
-                    print("Game found, sending game status!")
+                    print("Game found, sending game state!")
                     game: Game = self.games[party_id]
                     game_status = game.get_client_data(client_id)
                     return True, game_status
@@ -180,7 +188,7 @@ class Clients:
 
 
 # Other useful functions
-def make_random_not_in_list(list: list, length: int = 3):
+def make_random_not_in_list(list: list, length: int = 1):
     """Try find a random code that is not in a list"""
     found = False
     while not found:
