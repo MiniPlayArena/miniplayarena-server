@@ -172,8 +172,8 @@ class Clients:
                     has_won, won_status = game.game_is_won()
                     if has_won:
                         print("Game is over!")
-                        return True, won_status, ""
-                    return True, game_status, ""
+                        return True, won_status, won_status['game-state'][client_id]["display_message"]
+                    return True, game_status, game_status['game-state'][client_id]["display_message"]
         return False, None, ""
     
     def delete_game(self, party_id: str, client_id: str):
