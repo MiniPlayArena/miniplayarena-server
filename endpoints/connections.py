@@ -182,7 +182,7 @@ def get_game_state(data):
         emit("error", {"message", e})
 
 
-@socketio.on("updated-game-state")
+@socketio.on("update-game-state")
 def update_game_state(data):
     """Updates the game state if possible"""
     try:
