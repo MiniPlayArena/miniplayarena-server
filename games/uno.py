@@ -303,7 +303,7 @@ class Uno(Game):
         And the player's current hand (c_hand)
         """
         return {
-            "current_player": self.get_player_id(self.next_player),
+            "current_player": self.get_player_id(self.current_player),
             "c_facing_card": str(self.get_top_card()),
             "c_hand": [
                 str(card) for card in self.user_hands[player]
