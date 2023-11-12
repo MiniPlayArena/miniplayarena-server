@@ -129,8 +129,11 @@ class Uno(Game):
             return r_data
 
         if "pick-card" in turn_data:
-            print("Giving cards to user")
-            self.give_cards(self.get_player_index(current_player), 1)
+            if not self.give_cards(self.get_player_index(current_player), 1):
+                r_data["game-state"][current_player].update(
+                        {"display_message": "There are no more cards left in the deck. You are too greedy."}
+                    )
+                return r_data
             if not self.can_play(current_player):
                 self.update_player_pointers()
             return self.get_all_client_data()
@@ -163,11 +166,6 @@ class Uno(Game):
 
         # update current player and next player pointers
         self.update_player_pointers(self.reversed)
-
-        if len(self.draw_pile) == 0:
-            self.draw_pile = reversed(self.discard_pile)
-
-            self.draw_first_card()
 
         # re-generate data as the state has changed
         return self.get_all_client_data()
@@ -278,9 +276,16 @@ class Uno(Game):
         returns:
             None
         """
+        if len(self.draw_pile) <= num_cards:
+                if len(self.discard_pile) == 1:
+                   return False
+                self.draw_pile = list(reversed(self.discard_pile))
+                self.discard_pile = [self.draw_pile.pop(-1)]
+
         self.user_hands[self.get_player_id(player)] += [
             self.draw_next_card() for i in range(num_cards)
         ]
+        return True
 
     def deal_hands(self, num_players: int) -> [Card]:
         """Draws 7 cards for each player"""
