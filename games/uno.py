@@ -108,7 +108,7 @@ class Uno(Game):
                 For Uno, this should be in the format {
                     played_card: <played-card>
                 }
-                where <played-card> is the index of the card that the player has attempted to play
+                where <played-card> is the identifier of the card that the player has attempted to play
         """
 
         r_data = self.get_all_client_data()
