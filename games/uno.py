@@ -72,7 +72,7 @@ class Uno(Game):
         self.discard_pile = [self.draw_next_card()]                # stack
 
         # make sure first card is not wildcard
-        while not self.is_wildcard(self.get_top_card()):
+        while self.is_wildcard(self.get_top_card()):
             self.discard_pile = [self.draw_next_card()]
         # inits
         self.reversed = False
