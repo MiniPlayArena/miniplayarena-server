@@ -2,7 +2,6 @@ from enum import IntFlag
 from games.game import Game
 import random
 
-
 class Card(IntFlag):
     """Flags for different parts of an uno card"""
 
@@ -106,6 +105,9 @@ class Uno(Game):
         # apply the result of the first card TODO: if this is change colour then we are fucked
         self.do_card(self.get_top_card(), 0, {"action-change-colour": 8})
 
+
+        self.winners = []
+
     def take_turn(self, current_player: str, turn_data: dict) -> bool:
         """Takes a turn given the current player and the player that will bare the
         results of the player's actions
@@ -118,6 +120,9 @@ class Uno(Game):
                 }
                 where <played-card> is the identifier of the card that the player has attempted to play
         """
+
+        print(f"Current player: {current_player}, Next Player: {self.get_player_id(self.next_player)}")
+
         r_data = self.get_all_client_data()
 
         # if the current player is not the one that is allowed to play
@@ -129,6 +134,7 @@ class Uno(Game):
             return r_data
 
         if "pick-card" in turn_data:
+            print("Picking card")
             if not self.give_cards(self.get_player_index(current_player), 1):
                 r_data["game-state"][current_player].update(
                         {"display_message": "There are no more cards left in the deck. You are too greedy."}
@@ -159,10 +165,13 @@ class Uno(Game):
         # since they can play the card, do the actions
         self.discard_pile.append(played_card)
         self.user_hands[current_player].remove(played_card)
+        print(f"Turn data: {turn_data}")
         self.do_card(played_card, self.next_player, turn_data)
-
-        if len(self.user_hands[current_player]) == 0 and self.winner == "":
-            self.winner = current_player
+        print("Played card")
+        if len(self.user_hands[current_player]) == 0 and current_player not in self.winners:
+            self.winners.append(current_player)
+            self.num_players -= 1
+            print(f"Player {current_player} has run out of cards")
 
         # update current player and next player pointers
         self.update_player_pointers(self.reversed)
@@ -179,33 +188,27 @@ class Uno(Game):
             self.discard_pile = [self.draw_next_card()]
 
     def has_won(self, player: int) -> bool:
-        return len(self.user_hands[player]) == 0
+        return len(self.winners) > (self.num_players - 2)
 
     def game_is_won(self) -> bool:
-        count = 0
-        for player in self.user_hands:
-            if len(self.user_hands[player]) != 0:
-                count += 1
-        # TODO: do this please
-        # return count < 2, self.get_final_gamestate()
-        return False, {}
+        won = len(self.winners) > (len(self.players) - 2)
+        return won, self.get_final_gamestate() if won else {}
 
     def do_card(self, card: int, next_player: int, play_data: dict):
         """Applies the result of a special card"""
         if card & Card.V_PLUS_FOUR:
             self.give_cards(next_player, 4)
-            self.change_colour(play_data["action-change-colour"])
+            self.c_col_card = self.change_colour(play_data["selected_colour"])
         elif card & Card.V_PLUS_TWO:
             # TODO: Implement logic for stacking +2s
             self.give_cards(next_player, 2)
         elif card & Card.V_SKIP:
-            self.next_player = (next_player + 1) % self.num_players
+            self.increment_next_player(2)
         elif card & Card.V_REVERSE:
             self.reversed = not self.reversed
-            n_player = self.next_player - 1 if self.reversed else self.next_player + 1
-            self.next_player = n_player % self.num_players
+            self.increment_next_player(1)
         elif card & Card.V_CHANGE_COLOUR:
-            self.change_colour(play_data["action-change-colour"])
+            self.c_col_card = self.change_colour(play_data["selected_colour"])
 
     def can_play(self, player: int) -> bool:
         """Checks if a player can actually place a card
@@ -253,7 +256,7 @@ class Uno(Game):
 
         # if the colour was just changed, only check for colour
         if top_card & Card.V_PLUS_FOUR or top_card & Card.V_CHANGE_COLOUR:
-            return Uno.are_same_colour(played_card, self.c_col_card)
+            return Uno.are_same_colour(played_card, self.c_col_card) or Uno.is_wildcard(played_card)
 
         # else check for same colour, value or wildcard being played
         return (
@@ -290,7 +293,19 @@ class Uno(Game):
     def deal_hands(self, num_players: int) -> [Card]:
         """Draws 7 cards for each player"""
         for player in range(num_players):
-            self.give_cards(player, 7)
+            self.give_cards(player, 2)
+    
+    def increment_next_player(self, num: int) -> None:
+        n_player = self.current_player - num if self.reversed else self.current_player + num
+        self.next_player = n_player % self.num_players
+        if self.get_player_id(self.next_player) in self.winners:
+            print(f"Incremembting again as {self.next_player} is a winner")
+            self.increment_next_player(1)
+        print(f"Inremented to Current player: {self.get_player_id(self.current_player)}, Next Player: {self.get_player_id(self.next_player)}")
+
+    
+    def can_still_play(self, player: str) -> bool:
+        return len(self.user_hands[player]) != 0
 
     @staticmethod
     def is_invalid_starter(card: int) -> bool:
@@ -352,7 +367,16 @@ class Uno(Game):
         returns:
             The card with just the colour
         """
-        return Card[f"C_{colour.upper()}"]
+        print(f"Col: {colour}")
+        if colour == "UNKNOWN":
+            return Card.CL_RED
+        col = f"CL_{colour[0].replace('R', 'RED').replace('G', 'GREEN').replace('Y', 'YELLOW').replace('B', 'BLUE')}"
+        return Card[col]
+    
+    def get_player_data(self, player: str) -> dict:
+        return {
+            "num_cards": len(self.user_hands[player])
+        }
 
     def get_client_data(self, player: str) -> dict:
         """For Uno, the player data that is needed for each individual client is:
@@ -364,6 +388,9 @@ class Uno(Game):
             "current_player": self.get_player_id(self.current_player),
             "c_facing_card": str(self.get_top_card()),
             "c_hand": [str(card) for card in self.user_hands[player]],
+            "c_player_data": {p: self.get_player_data(p) for p in self.players},
             "c_colour": current_colour,
+            "c_reversed": self.reversed,
             "display_message": "",
+            "winners": self.winners
         }

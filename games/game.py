@@ -3,7 +3,7 @@ from typing import Optional
 
 class Game:
     def __init__(
-        self, max_players: int, name: str, player_ids: str, min_players: int = 1
+        self, max_players: int, name: str, player_ids: str, min_players: int = 2
     ):
         self.player_constraints = (min_players, max_players)
         self.num_players = len(player_ids)
@@ -12,7 +12,7 @@ class Game:
         self.name = name
         self.current_player = 0
         self.next_player = 1 % len(self.players)
-        self.winner = ""
+        self.winners = []
 
     def update_player_pointers(self, reverse: bool = False) -> None:
         """Updates the player pointers once a turn has been taken
@@ -20,9 +20,18 @@ class Game:
         args:
             reverse(bool): Whether or not the direction of players should be cw (false) or acw (true)
         """
-        self.current_player = self.next_player
+        self.current_player = self.next_player % self.num_players
         self.next_player += -1 if reverse else 1
-        self.next_player %= self.num_players
+        self.next_player  = self.next_player % self.num_players
+        while self.get_player_id(self.current_player) in self.winners:
+            print(f"{self.current_player} has won")
+            self.current_player = self.next_player % self.num_players
+            self.next_player += -1 if reverse else 1
+            self.next_player  = self.next_player % self.num_players
+        
+        while self.get_player_id(self.next_player) in self.winners:
+            self.next_player += -1 if reverse else 1
+            self.next_player  = self.next_player % self.num_players
 
     def get_active_player(self) -> int:
         """Gets the player who's turn it is next.
@@ -103,11 +112,14 @@ class Game:
         )
 
     def get_final_gamestate(self) -> dict:
-        c_data = self.get_all_client_data()["game-state"]
-        print(c_data)
-        return {
-            "game-state": {p: c_data[p].update({"winner": self.winner}) for p in c_data}
-        }
+        print("Getting final data")
+        c_data = self.get_all_client_data()
+        for p in c_data["game-state"]:
+            c_data["game-state"][p]["game_over"] = True
+        return c_data
+    
+    def can_still_play(self, player: str) -> bool:
+        raise NotImplementedError("Implement can still play")
 
     def game_is_won(self) -> str:
         """Gets whether or not the game has been won
