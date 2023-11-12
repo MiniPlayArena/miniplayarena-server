@@ -210,7 +210,6 @@ def get_game_state(data):
 @socketio.on("update-game-state")
 def update_game_state(data):
     """Updates the game state if possible"""
-    print("Tryignt o updated game stats")
     try:
         success, game_state, error_message = clients.update_game_state(
             data["partyId"], data["clientId"], data["gameState"]
