@@ -156,12 +156,30 @@ def create_game(data):
         emit("error", {"message": e})
 
 
+@socketio.on("pickup-card")
+def pickup_card(data):
+    print("Picking up card")
+    try:
+        success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], {"pick-card": True})
+        print(f"Game state: {game_state}")
+        if success:
+            emit(
+                "game-state", 
+                {
+                    "partyId": data["partyId"],
+                    "gameId": data["gameId"],
+                    "gameState": game_state['game-state'][data["clientId"]]
+                }
+            )
+    except Exception as e:
+        emit("error", {"message", e})
+
 @socketio.on("get-game-state")
 def get_game_state(data):
     """Allows the user to get the games state"""
     try:
         success, game_state = clients.get_game_state(data["partyId"], data["clientId"])
-
+        del game_state["display_message"]
         if success:
             emit(
                 "game-state",
@@ -188,25 +206,31 @@ def update_game_state(data):
     print("Tryignt o updated game stats")
     try:
         success, game_state, error_message = clients.update_game_state(data["partyId"], data["clientId"], data["gameState"])
-
+        del game_state['game-state'][data["clientId"]]["display_message"]
         if success:
             emit(
                 "game-state",
                 {
                     "partyId": data["partyId"],
                     "gameId": data["gameId"],
-                    "gameState": game_state
+                    "gameState": game_state['game-state'][data["clientId"]],
                 }
             )
-            emit(
-                "new-game-state-available",
-                {
-                    "partyId": data["partyId"],
-                    "gameId": data["gameId"],
-                    "lastMove": data["clientId"] 
-                },
-                to = data["partyId"]
-            )
+            if error_message == "":
+                emit(
+                    "new-game-state-available",
+                    {
+                        "partyId": data["partyId"],
+                        "gameId": data["gameId"],
+                        "lastMove": data["clientId"] 
+                    },
+                    to = data["partyId"]
+                )
+            else:
+                emit("error",
+                     {
+                         "message": error_message
+                     })
         else:
             emit(
                 "error",
