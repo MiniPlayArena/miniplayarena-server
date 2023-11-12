@@ -29,4 +29,4 @@ def index():
 if __name__ == "__main__":
     import endpoints.connections as _  # noqa: F401
 
-    socketio.run(app, port=696, host="0.0.0.0", debug=True)
+    socketio.run(app, port=696, host="0.0.0.0", debug=False)
