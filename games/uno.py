@@ -71,6 +71,9 @@ class Uno(Game):
         self.deal_hands(self.num_players)
         self.discard_pile = [self.draw_next_card()]                # stack
 
+        # make sure first card is not wildcard
+        while not self.is_wildcard(self.get_top_card()):
+            self.discard_pile = [self.draw_next_card()]
         # inits
         self.reversed = False
         self.c_col_card = None
@@ -145,7 +148,7 @@ class Uno(Game):
         """
         if card & Card.V_PLUS_FOUR:
             self.give_cards(next_player, 4)
-            self.change_colour()
+            self.change_colour(play_data["action-change-colour"])
         elif card & Card.V_PLUS_TWO:
             #TODO: Implement logic for stacking +2s
             self.give_cards(next_player, 2)
