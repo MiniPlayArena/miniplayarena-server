@@ -89,7 +89,7 @@ class Uno(Game):
         self.discard_pile = [self.draw_next_card()]                # stack
 
         # make sure first card is not wildcard
-        while self.is_wildcard(self.get_top_card()):
+        while self.is_invalid_starter(self.get_top_card()):
             self.discard_pile = [self.draw_next_card()]
         # inits
         self.reversed = False
@@ -114,31 +114,36 @@ class Uno(Game):
 
         # if the current player is not the one that is allowed to play
         if current_player != self.get_player_id(self.current_player):
-            r_data["game-state"][current_player].update({"display-message": "It is not your turn you gimp"})
+            print("Not current turn")
+            r_data["game-state"][current_player]["display_message"] = "It is not your turn to play!"
             return r_data
-            
-        # if the user cannot play a card then they 
-        if not self.can_play(current_player):
-            self.give_cards(current_player, 1)
-            self.update_player_pointers()
-            r_data["game-state"][current_player].update({"display-message": "You cannot play. Unlucky :D"})
-            return r_data
+
+        if "pick-card" in turn_data:
+            print("Giving cards to user")
+            self.give_cards(self.get_player_index(current_player), 1)
+            if not self.can_play(current_player):
+                self.update_player_pointers()
+            return self.get_all_client_data()
 
         # get the card that the user wishes to play
         played_card = Card.from_packet(turn_data["played_card"])
         print(f"Player {current_player} played card {played_card}")
         if played_card not in self.user_hands[current_player]:
-            r_data["game-state"][current_player].update({"display-message": "You cannot play that card as you don't have it"})
+            r_data["game-state"][current_player].update({"display_message": "You cannot play that card as you don't have it"})
             return r_data
 
         # if they cannot play it then try this function again
         if not self.can_play_card(played_card):
             # re-add card to hand and return
-            self.user_hands[current_player].append(played_card)
-            r_data["game-state"][current_player].update({"display-message": "Cannot play that card idiot"})
-        
+            print("Can't play card :(")
+            r_data["game-state"][current_player]["display_message"] =  "Cannot play that card "
+            return r_data
+
         # since they can play the card, do the actions
         self.discard_pile.append(played_card)
+        print(self.user_hands[current_player])
+        self.user_hands[current_player].remove(played_card)
+        print(self.user_hands[current_player])
         self.do_card(played_card, self.next_player, turn_data)
 
         if len(self.user_hands[current_player]) == 0 and self.winner == "":
@@ -262,6 +267,13 @@ class Uno(Game):
             self.give_cards(player, 7)
     
     @staticmethod
+    def is_invalid_starter(card: int) -> bool:
+        return Uno.is_wildcard(card) or \
+            card & Card.V_PLUS_TWO or \
+            card & Card.V_SKIP or \
+            card & Card.V_REVERSE
+    
+    @staticmethod
     def are_same_colour(card1: int, card2: int) -> bool:
         """ Checks if two cards have the same colour flag bit set
 
@@ -326,6 +338,7 @@ class Uno(Game):
             "c_facing_card": str(self.get_top_card()),
             "c_hand": [
                 str(card) for card in self.user_hands[player]
-            ]
+            ],
+            "display_message": ""
         }
     
