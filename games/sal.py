@@ -42,7 +42,7 @@ class SnakesAndLadders(Game):
         """
         return {
             "player-position": self.player_positions[player],
-            "other-player-positions": self.player_positions
+            "other-player-positions": dict(filter(lambda x: x[0] != player, self.player_positions.items()))
         }
     
     def take_turn(self, player: int, turn_data: dict):

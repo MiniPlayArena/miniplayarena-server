@@ -135,8 +135,8 @@ def create_game(game_id: str, players: [str]) -> Optional[Game]:
     if game_id == "uno":
         import games.uno as uno
         r_val = uno.Uno(players)
-    elif game_id == "snakes":
-        import sal
+    elif game_id == "snakes_ladders":
+        import games.sal as sal
         r_val =  sal.SnakesAndLadders(players)
     r_val = None if (not r_val or not r_val.is_valid_playercount()) else r_val
     return r_val, "Not enough players to start the game. Get more friends and then retry 🤓" if not r_val else None

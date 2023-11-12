@@ -27,6 +27,23 @@ class Card(IntFlag):
     V_PLUS_FOUR = 1<<18
     V_CHANGE_COLOUR = 1<<19
 
+    @staticmethod
+    def from_packet(c: str):
+        if c == "W+":
+            return Card.V_PLUS_FOUR
+        elif c == "WC":
+            return Card.V_CHANGE_COLOUR
+        col = f"CL_{c[0].replace('R', 'RED').replace('G', 'GREEN').replace('Y', 'YELLOW').replace('B', 'BLUE')}"
+        
+        if c[1] == '+':
+            return Card[col] | Card.V_PLUS_TWO
+        elif c[1] == 'S':
+            return Card[col] | Card.V_SKIP
+        elif c[1] == 'R':
+            return Card[col] | Card.V_REVERSE
+        else:
+            return Card[col] | Card[f"V_{c[1]}"]
+
     def __repr__(self) -> str:
         vals = self.name.replace('CL_', '').split("|")
         if self & Card.V_SKIP:
@@ -104,15 +121,16 @@ class Uno(Game):
         # if the user cannot play a card then they 
         if not self.can_play(current_player):
             self.give_cards(current_player, 1)
-            self.update_player_index()
+            self.update_player_pointers()
             r_data["game-state"][current_player].update({"display-message": "You cannot play. Unlucky :D"})
-        
-        # get the card that the user wishes to play
-        played_card = int(turn_data["played-card"])
-        if played_card < 0 or played_card >= len(self.user_hands[current_player]):
-            r_data["game-state"][current_player].update({"display-message": "Error.."})
             return r_data
-        
+
+        # get the card that the user wishes to play
+        played_card = Card.from_packet(turn_data["played-card"])
+        if played_card not in self.user_hands[current_player]:
+            r_data["game-state"][current_player].update({"display-message": "You cannot play that card as you don't have it"})
+            return r_data
+
         card = self.user_hands[current_player].pop()
         # if they cannot play it then try this function again
         if not self.can_play_card(card):
