@@ -110,11 +110,10 @@ class Uno(Game):
                 }
                 where <played-card> is the identifier of the card that the player has attempted to play
         """
-
         r_data = self.get_all_client_data()
 
         # if the current player is not the one that is allowed to play
-        if current_player != self.current_player:
+        if current_player != self.get_player_id(self.current_player):
             r_data["game-state"][current_player].update({"display-message": "It is not your turn you gimp"})
             return r_data
             
@@ -126,7 +125,8 @@ class Uno(Game):
             return r_data
 
         # get the card that the user wishes to play
-        played_card = Card.from_packet(turn_data["played-card"])
+        played_card = Card.from_packet(turn_data["played_card"])
+        print(f"Player {current_player} played card {played_card}")
         if played_card not in self.user_hands[current_player]:
             r_data["game-state"][current_player].update({"display-message": "You cannot play that card as you don't have it"})
             return r_data
@@ -157,9 +157,11 @@ class Uno(Game):
     def game_is_won(self) -> bool:
         count = 0
         for player in self.user_hands:
-            if len(self.user_hands[player] != 0):
+            if len(self.user_hands[player]) != 0:
                 count +=1
-        return count < 2, self.get_final_gamestate()
+        #TODO: do this please
+        #return count < 2, self.get_final_gamestate()
+        return False, {}
 
     def do_card(self, card: int, next_player: int, play_data: dict):
         """ Applies the result of a special card

@@ -97,8 +97,9 @@ class Game:
 
 
     def get_final_gamestate(self) -> dict:
-        c_data = self.get_all_client_data()
-        return {p.update({"winner": self.winner}): c_data[p] for p in c_data}
+        c_data = self.get_all_client_data()['game-state']
+        print(c_data)
+        return {'game-state': {p: c_data[p].update({'winner': self.winner}) for p in c_data}}
 
 
     def game_is_won(self) -> str:
