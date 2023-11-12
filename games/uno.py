@@ -131,16 +131,15 @@ class Uno(Game):
             r_data["game-state"][current_player].update({"display-message": "You cannot play that card as you don't have it"})
             return r_data
 
-        card = self.user_hands[current_player].pop()
         # if they cannot play it then try this function again
-        if not self.can_play_card(card):
+        if not self.can_play_card(played_card):
             # re-add card to hand and return
-            self.user_hands[current_player].append(card)
+            self.user_hands[current_player].append(played_card)
             r_data["game-state"][current_player].update({"display-message": "Cannot play that card idiot"})
         
         # since they can play the card, do the actions
-        self.discard_pile.append(card)
-        self.do_card(card, self.next_player, turn_data)
+        self.discard_pile.append(played_card)
+        self.do_card(played_card, self.next_player, turn_data)
 
         if len(self.user_hands[current_player]) == 0 and self.winner == "":
             self.winner = current_player
