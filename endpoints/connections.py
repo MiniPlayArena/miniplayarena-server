@@ -167,10 +167,19 @@ def pickup_card(data):
                     "gameState": game_state["game-state"][data["clientId"]],
                 },
             )
+            emit(
+                "new-game-state-available",
+                {
+                    "partyId": data["partyId"],
+                    "gameId": data["gameId"],
+                    "lastMove": data["clientId"],
+                },
+                to=data["partyId"],
+            )
             if error_message != "":
                 emit("error", {"message": error_message})
     except Exception as e:
-        emit("error", {"message", e})
+        emit("error", {"message": e})
 
 
 @socketio.on("get-game-state")
@@ -178,7 +187,8 @@ def get_game_state(data):
     """Allows the user to get the games state"""
     try:
         success, game_state = clients.get_game_state(data["partyId"], data["clientId"])
-        del game_state["display_message"]
+        if "display_message" in game_state:
+            del game_state["display_message"]
         if success:
             emit(
                 "game-state",
@@ -194,7 +204,7 @@ def get_game_state(data):
                 {"message": "game state could not be found, is a game being played?"},
             )
     except Exception as e:
-        emit("error", {"message", e})
+        emit("error", {"message": e})
 
 
 @socketio.on("update-game-state")
@@ -215,17 +225,16 @@ def update_game_state(data):
                     "gameState": game_state["game-state"][data["clientId"]],
                 },
             )
-            if error_message == "":
-                emit(
-                    "new-game-state-available",
-                    {
-                        "partyId": data["partyId"],
-                        "gameId": data["gameId"],
-                        "lastMove": data["clientId"],
-                    },
-                    to=data["partyId"],
-                )
-            else:
+            emit(
+                "new-game-state-available",
+                {
+                    "partyId": data["partyId"],
+                    "gameId": data["gameId"],
+                    "lastMove": data["clientId"],
+                },
+                to=data["partyId"],
+            )
+            if error_message:
                 emit("error", {"message": error_message})
         else:
             emit("error", {"message": error_message})
