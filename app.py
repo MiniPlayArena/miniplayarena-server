@@ -8,7 +8,7 @@ from clients import Clients
 app = Flask(__name__)
 app.config["SECRET_KEY"] = "cum-monster"
 
-log = logging.getLogger('werkzeug')
+log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
 
 limiter = Limiter(
@@ -19,6 +19,7 @@ limiter = Limiter(
 )
 socketio = SocketIO(app, cors_allowed_origins="*")
 clients = Clients()
+
 
 @app.route("/")
 def index():

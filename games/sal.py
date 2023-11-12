@@ -1,9 +1,8 @@
 from games.game import Game
 import random
 
-class SnakesAndLadders(Game):
-    
 
+class SnakesAndLadders(Game):
     def __init__(self, players: [str]):
         super().__init__(4, "Snakes and Ladders", players)
         # If a board number has a value, then landing on that square jumps you to the position
@@ -22,16 +21,16 @@ class SnakesAndLadders(Game):
             8: 30,
             1: 38,
             4: 14,
-            21: 42
+            21: 42,
         }
         self.player_positions = {player: 1 for player in self.players}
-    
+
     def get_client_data(self, player: int) -> dict:
         """Returns the game state for a specific client
 
         args:
             player(int): the player to get the game state for
-        
+
         returns:
             dictionary with the client data
                 For snakes and ladders, this is in the format
@@ -42,9 +41,11 @@ class SnakesAndLadders(Game):
         """
         return {
             "player-position": self.player_positions[player],
-            "other-player-positions": self.player_positions
+            "other-player-positions": dict(
+                filter(lambda x: x[0] != player, self.player_positions.items())
+            ),
         }
-    
+
     def take_turn(self, player: int, turn_data: dict):
         # this is snakes and ladders so we literally do not need turn data from the user
         # random roll :D
@@ -57,16 +58,17 @@ class SnakesAndLadders(Game):
         pos_to_check = self.player_positions[player]
         if pos_to_check in self.snakes_and_ladders:
             self.player_positions[player] = self.snakes_and_ladders[pos_to_check]
-        
+
         if pos_to_check == 100:
             self.winner = player
-        
+
         r_data = self.get_all_client_data()
         r_data.update({"num-rolled": roll})
-        return 
-    
+        return
+
     def game_is_won(self) -> str:
         return self.winner != "", self.get_final_gamestate()
+
 
 if __name__ == "__main__":
     s = SnakesAndLadders(2)
