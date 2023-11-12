@@ -72,7 +72,6 @@ class Uno(Game):
         self.discard_pile = [self.draw_next_card()]                # stack
 
         # inits
-        self.next_player = 1        # needed as can be skipped by certain cards
         self.reversed = False
         self.c_col_card = None
 
