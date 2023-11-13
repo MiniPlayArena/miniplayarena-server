@@ -294,12 +294,12 @@ class Uno(Game):
     def deal_hands(self, num_players: int) -> [Card]:
         """Draws 7 cards for each player"""
         for player in range(num_players):
-            self.give_cards(player, 2)
+            self.give_cards(player, 7)
     
     def increment_next_player(self, num: int) -> None:
         n_player = self.current_player - num if self.reversed else self.current_player + num
         self.next_player = n_player % self.num_players
-        if self.get_player_id(self.next_player) in self.winners:
+        if self.get_player_id(self.next_player) in self.winners or self.next_player == self.current_player:
             print(f"Incremembting again as {self.next_player} is a winner")
             self.increment_next_player(1)
         print(f"Inremented to Current player: {self.get_player_id(self.current_player)}, Next Player: {self.get_player_id(self.next_player)}")
