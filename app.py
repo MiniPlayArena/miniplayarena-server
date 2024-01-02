@@ -4,9 +4,10 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_socketio import SocketIO
 from clients import Clients
+from secrets import token_hex
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "cum-monster"
+app.config["SECRET_KEY"] = token_hex(16)
 
 log = logging.getLogger("werkzeug")
 log.setLevel(logging.ERROR)
