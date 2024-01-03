@@ -24,9 +24,9 @@ clients = Clients()
 
 @app.route("/")
 def index():
-    return "<h1>kushy wushy >~<</h1>"
+    return "<h1>Socket Server Active!</h1>"
 
 if __name__ == "__main__":
     import endpoints.connections as _  # noqa: F401
 
-    socketio.run(app, port=1205, debug=False)
+    socketio.run(app, port=1205, allow_unsafe_werkzeug=True, debug=False) # gunicorn running on server, for testing
